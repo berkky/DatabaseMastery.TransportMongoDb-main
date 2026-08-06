@@ -1,6 +1,6 @@
-using AutoMapper;
 using DatabaseMastery.TransportMongoDb.Dtos.ShipmentDtos;
 using DatabaseMastery.TransportMongoDb.Entities;
+using DatabaseMastery.TransportMongoDb.Mapping;
 using DatabaseMastery.TransportMongoDb.Settings;
 using MongoDB.Driver;
 
@@ -9,22 +9,19 @@ namespace DatabaseMastery.TransportMongoDb.Services.ShipmentServices
     public class ShipmentService : IShipmentService
     {
         private readonly IMongoCollection<Shipment> _shipmentCollection;
-        private readonly IMapper _mapper;
 
-        public ShipmentService(IMapper mapper, IDatabaseSettings databaseSettings)
+        public ShipmentService(IDatabaseSettings databaseSettings)
         {
             var client = new MongoClient(databaseSettings.ConnectionString);
             var database = client.GetDatabase(databaseSettings.DatabaseName);
 
             _shipmentCollection = database.GetCollection<Shipment>(
                 databaseSettings.ShipmentCollectionName);
-
-            _mapper = mapper;
         }
 
         public async Task CreateShipmentAsync(CreateShipmentDto createShipmentDto)
         {
-            var value = _mapper.Map<Shipment>(createShipmentDto);
+            var value = ShipmentMapper.ToEntity(createShipmentDto);
             await _shipmentCollection.InsertOneAsync(value);
         }
 
@@ -39,7 +36,7 @@ namespace DatabaseMastery.TransportMongoDb.Services.ShipmentServices
                 .Find(x => true)
                 .ToListAsync();
 
-            return _mapper.Map<List<ResultShipmentDto>>(values);
+            return ShipmentMapper.ToResultList(values)!;
         }
 
         public async Task<long> GetTotalShipmentCountAsync()
@@ -81,7 +78,7 @@ namespace DatabaseMastery.TransportMongoDb.Services.ShipmentServices
                 .Find(x => x.ShipmentId == id)
                 .FirstOrDefaultAsync();
 
-            return _mapper.Map<GetShipmentByIdDto>(value);
+            return ShipmentMapper.ToGetById(value)!;
         }
 
         public async Task<GetShipmentByIdDto?> GetShipmentByTrackingNumberAsync(
@@ -93,7 +90,7 @@ namespace DatabaseMastery.TransportMongoDb.Services.ShipmentServices
 
             return value == null
                 ? null
-                : _mapper.Map<GetShipmentByIdDto>(value);
+                : ShipmentMapper.ToGetById(value);
         }
 
         public async Task UpdateShipmentAsync(UpdateShipmentDto updateShipmentDto)
@@ -102,12 +99,9 @@ namespace DatabaseMastery.TransportMongoDb.Services.ShipmentServices
                 .Find(x => x.ShipmentId == updateShipmentDto.ShipmentId)
                 .FirstOrDefaultAsync();
 
-            var value = _mapper.Map<Shipment>(updateShipmentDto);
-
-            if (existingShipment != null)
-            {
-                value.Trackings = existingShipment.Trackings;
-            }
+            var value = ShipmentMapper.ToEntity(
+                updateShipmentDto,
+                existingShipment?.Trackings);
 
             await _shipmentCollection.FindOneAndReplaceAsync(
                 x => x.ShipmentId == updateShipmentDto.ShipmentId,
