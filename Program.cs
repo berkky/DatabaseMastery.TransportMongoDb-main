@@ -1,5 +1,7 @@
+using DatabaseMastery.TransportMongoDb.Entities;
 using DatabaseMastery.TransportMongoDb.Services.SliderServices;
 using DatabaseMastery.TransportMongoDb.Settings;
+using DatabaseMastery.TransportMongoDb.Security;
 using DatabaseMastery.TransportMongoDb.Services.AdminUserServices;
 using DatabaseMastery.TransportMongoDb.Services.BrandServices;
 using DatabaseMastery.TransportMongoDb.Services.OfferServices;
@@ -10,6 +12,7 @@ using DatabaseMastery.TransportMongoDb.Services.ProjectServices;
 using DatabaseMastery.TransportMongoDb.Services.ShipmentServices;
 using DatabaseMastery.TransportMongoDb.Services.ShipmentTrackingServices;
 using DatabaseMastery.TransportMongoDb.Services.TestimonialServices;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
 using MongoDB.Driver;
 
@@ -28,6 +31,8 @@ builder.Services.AddScoped<ITestimonialService, TestimonialService>();
 builder.Services.AddScoped<IAdminUserService, AdminUserService>();
 
 builder.Services.Configure<DatabaseSettings>(builder.Configuration.GetSection("DatabaseSettings"));
+builder.Services.Configure<AdminBootstrapOptions>(
+    builder.Configuration.GetSection(AdminBootstrapOptions.SectionName));
 builder.Services.AddScoped<IDatabaseSettings>(sp =>
     sp.GetRequiredService<IOptions<DatabaseSettings>>().Value);
 builder.Services.AddSingleton<IMongoClient>(sp =>
@@ -35,6 +40,9 @@ builder.Services.AddSingleton<IMongoClient>(sp =>
     var settings = sp.GetRequiredService<IOptions<DatabaseSettings>>().Value;
     return new MongoClient(settings.ConnectionString);
 });
+builder.Services.AddSingleton<IPasswordHasher<AdminUser>, PasswordHasher<AdminUser>>();
+builder.Services.AddSingleton<IAdminCredentialService, AdminCredentialService>();
+builder.Services.AddHostedService<AdminBootstrapHostedService>();
 
 builder.Services.AddControllersWithViews();
 
