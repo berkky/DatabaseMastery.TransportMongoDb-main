@@ -9,7 +9,6 @@ using DatabaseMastery.TransportMongoDb.Services.ProjectServices;
 using DatabaseMastery.TransportMongoDb.Services.ShipmentServices;
 using DatabaseMastery.TransportMongoDb.Services.ShipmentTrackingServices;
 using DatabaseMastery.TransportMongoDb.Services.TestimonialServices;
-using System.Reflection;
 using Microsoft.Extensions.Options;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -25,8 +24,6 @@ builder.Services.AddScoped<IShipmentService, ShipmentService>();
 builder.Services.AddScoped<IShipmentTrackingService, ShipmentTrackingService>();
 builder.Services.AddScoped<ITestimonialService, TestimonialService>();
 
-
-builder.Services.AddAutoMapper(Assembly.GetExecutingAssembly());
 builder.Services.Configure<DatabaseSettings>(builder.Configuration.GetSection("DatabaseSettings"));
 builder.Services.AddScoped<IDatabaseSettings>(sp =>
     sp.GetRequiredService<IOptions<DatabaseSettings>>().Value);
