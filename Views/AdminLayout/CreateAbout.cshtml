@@ -711,7 +711,8 @@
     </div>
 
     <!-- Split Layout -->
-    <form method="post" id="aboutForm">
+    <form asp-controller="About" asp-action="CreateAbout" method="post" id="aboutForm">
+        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
         <div class="split-layout">
             <!-- Form Column -->
             <div class="form-column">
@@ -739,6 +740,7 @@
                                placeholder="Örn: Bizim Hikayemiz, Kimiz Biz, Misyonumuz..."
                                maxlength="150"
                                required />
+                        <span asp-validation-for="Title" class="text-danger"></span>
                         <div class="input-meta">
                             <div class="input-hint">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -768,6 +770,7 @@
                                   placeholder="Firmanızın hikayesini, değerlerini ve vizyonunu buraya yazın..."
                                   maxlength="1000"
                                   required></textarea>
+                        <span asp-validation-for="Description" class="text-danger"></span>
                         <div class="input-meta">
                             <div class="input-hint">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -799,12 +802,14 @@
                                 Zorunlu
                             </span>
                         </div>
-                        <input type="url"
+                        <input type="text"
                                class="form-input"
                                asp-for="ImageUrl"
                                id="imageUrlInput"
-                               placeholder="https://example.com/image.jpg"
+                               placeholder="/images/about.jpg"
+                               maxlength="500"
                                required />
+                        <span asp-validation-for="ImageUrl" class="text-danger"></span>
                         <div class="input-meta">
                             <div class="input-hint">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">

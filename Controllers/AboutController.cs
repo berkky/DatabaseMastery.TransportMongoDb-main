@@ -3,6 +3,7 @@ using DatabaseMastery.TransportMongoDb.Security;
 using DatabaseMastery.TransportMongoDb.Services.AboutServices;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using MongoDB.Bson;
 
 namespace DatabaseMastery.TransportMongoDb.Controllers
 {
@@ -30,9 +31,17 @@ namespace DatabaseMastery.TransportMongoDb.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         [Authorize(Roles = AdminRoles.AdminsOnly)]
         public async Task<IActionResult> CreateAbout(CreateAboutDto createAboutDto)
         {
+            if (!ModelState.IsValid)
+            {
+                return View(
+                    "~/Views/AdminLayout/CreateAbout.cshtml",
+                    createAboutDto);
+            }
+
             await _AboutService.CreateAboutAsync(createAboutDto);
             return RedirectToAction(nameof(Aboutlist));
         }
@@ -50,14 +59,52 @@ namespace DatabaseMastery.TransportMongoDb.Controllers
         [Authorize(Roles = AdminRoles.AdminsOnly)]
         public async Task<IActionResult> UpdateAbout(string id)
         {
+            if (!ObjectId.TryParse(id, out _))
+            {
+                return NotFound();
+            }
+
             var values = await _AboutService.GetAboutByIdAsync(id);
-            return View("~/Views/AdminLayout/UpdateAbout.cshtml", values);
+            if (values is null || string.IsNullOrWhiteSpace(values.AboutId))
+            {
+                return NotFound();
+            }
+
+            var updateDto = new UpdateAboutDto
+            {
+                AboutId = values.AboutId,
+                Title = values.Title,
+                Description = values.Description,
+                ImageUrl = values.ImageUrl
+            };
+
+            return View("~/Views/AdminLayout/UpdateAbout.cshtml", updateDto);
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         [Authorize(Roles = AdminRoles.AdminsOnly)]
-        public async Task<IActionResult> UpdateAbout(UpdateAboutDto updateAboutDto)
+        public async Task<IActionResult> UpdateAbout(
+            string id,
+            UpdateAboutDto updateAboutDto)
         {
+            if (!ObjectId.TryParse(id, out _) ||
+                !ObjectId.TryParse(updateAboutDto.AboutId, out _) ||
+                !string.Equals(
+                    id,
+                    updateAboutDto.AboutId,
+                    StringComparison.Ordinal))
+            {
+                return BadRequest();
+            }
+
+            if (!ModelState.IsValid)
+            {
+                return View(
+                    "~/Views/AdminLayout/UpdateAbout.cshtml",
+                    updateAboutDto);
+            }
+
             await _AboutService.UpdateAboutAsync(updateAboutDto);
             return RedirectToAction(nameof(Aboutlist));
         }

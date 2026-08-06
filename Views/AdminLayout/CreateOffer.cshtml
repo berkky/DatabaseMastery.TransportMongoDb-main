@@ -702,6 +702,7 @@
 
     <!-- Form Layout -->
     <form asp-controller="Offer" asp-action="CreateOffer" method="post" id="offerForm">
+        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
         <div class="form-layout">
             <!-- Main Form -->
             <div class="form-card">
@@ -725,10 +726,11 @@
                            asp-for="Title"
                            id="titleInput"
                            placeholder="Örn: Sea Forwarding, Kargo Taşımacılığı..."
-                           maxlength="100"
+                           maxlength="150"
                            required />
+                    <span asp-validation-for="Title" class="text-danger"></span>
                     <div class="char-counter">
-                        <span id="titleCounter">0</span> / 100
+                        <span id="titleCounter">0</span> / 150
                     </div>
                 </div>
 
@@ -742,10 +744,11 @@
                               asp-for="Description"
                               id="descriptionInput"
                               placeholder="Hizmet detaylarını ve özelliklerini açıklayın..."
-                              maxlength="500"
+                              maxlength="1000"
                               required></textarea>
+                    <span asp-validation-for="Description" class="text-danger"></span>
                     <div class="char-counter">
-                        <span id="descCounter">0</span> / 500
+                        <span id="descCounter">0</span> / 1000
                     </div>
                 </div>
 
@@ -755,12 +758,14 @@
                         İkon URL
                         <span class="required-star">*</span>
                     </label>
-                    <input type="url"
+                    <input type="text"
                            class="form-input"
                            asp-for="ImageUrl"
                            id="imageUrlInput"
-                           placeholder="https://example.com/icon.svg"
+                           placeholder="/images/offer.svg"
+                           maxlength="500"
                            required />
+                    <span asp-validation-for="ImageUrl" class="text-danger"></span>
                     <div class="input-hint">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -780,6 +785,7 @@
                             <span class="toggle-slider"></span>
                         </label>
                     </div>
+                    <span asp-validation-for="IsStatus" class="text-danger"></span>
                 </div>
 
                 <div class="form-actions">
