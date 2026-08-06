@@ -407,6 +407,7 @@
     </div>
 
     <form asp-controller="Slider" asp-action="CreateSlider" method="post" id="sliderForm">
+        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
         <div class="form-card">
             <div class="form-content">
                 <div class="form-grid">
@@ -419,10 +420,11 @@
                                class="form-input"
                                asp-for="SliderTitle"
                                placeholder="Slider başlığını girin..."
-                               maxlength="100"
+                               maxlength="150"
                                required />
+                        <span asp-validation-for="SliderTitle" class="text-danger"></span>
                         <div class="char-counter">
-                            <span id="titleCounter">0</span> / 100W
+                            <span id="titleCounter">0</span> / 150
                         </div>
                     </div>
 
@@ -435,9 +437,10 @@
                                class="form-input"
                                asp-for="Subtitle"
                                placeholder="Alt başlık girin..."
-                               maxlength="150" />
+                               maxlength="200" />
+                        <span asp-validation-for="Subtitle" class="text-danger"></span>
                         <div class="char-counter">
-                            <span id="subtitleCounter">0</span> / 150
+                            <span id="subtitleCounter">0</span> / 200
                         </div>
                     </div>
 
@@ -449,9 +452,10 @@
                         <textarea class="form-textarea"
                                   asp-for="Description"
                                   placeholder="Slider açıklamasını girin..."
-                                  maxlength="500"></textarea>
+                                  maxlength="1000"></textarea>
+                        <span asp-validation-for="Description" class="text-danger"></span>
                         <div class="char-counter">
-                            <span id="descCounter">0</span> / 500
+                            <span id="descCounter">0</span> / 1000
                         </div>
                     </div>
 
@@ -460,12 +464,14 @@
                             <span class="form-label-icon">I</span>
                             Görsel URL
                         </label>
-                        <input type="url"
+                        <input type="text"
                                class="form-input"
                                asp-for="ImageUrl"
                                id="imageUrlInput"
-                               placeholder="https://example.com/image.jpg"
+                               placeholder="/images/slider.jpg"
+                               maxlength="500"
                                required />
+                        <span asp-validation-for="ImageUrl" class="text-danger"></span>
                     </div>
                 </div>
 

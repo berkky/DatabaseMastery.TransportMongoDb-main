@@ -3,6 +3,7 @@ using DatabaseMastery.TransportMongoDb.Security;
 using DatabaseMastery.TransportMongoDb.Services.BrandServices;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using MongoDB.Bson;
 
 namespace DatabaseMastery.TransportMongoDb.Controllers
 {
@@ -30,9 +31,17 @@ namespace DatabaseMastery.TransportMongoDb.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         [Authorize(Roles = AdminRoles.AdminsOnly)]
         public async Task<IActionResult> CreateBrand(CreateBrandDto createBrandDto)
         {
+            if (!ModelState.IsValid)
+            {
+                return View(
+                    "~/Views/AdminLayout/CreateBrand.cshtml",
+                    createBrandDto);
+            }
+
             await _BrandService.CreateBrandAsync(createBrandDto);
             return RedirectToAction(nameof(Brandlist));
         }
@@ -50,14 +59,52 @@ namespace DatabaseMastery.TransportMongoDb.Controllers
         [Authorize(Roles = AdminRoles.AdminsOnly)]
         public async Task<IActionResult> UpdateBrand(string id)
         {
+            if (!ObjectId.TryParse(id, out _))
+            {
+                return NotFound();
+            }
+
             var values = await _BrandService.GetBrandByIdAsync(id);
-            return View("~/Views/AdminLayout/UpdateBrand.cshtml", values);
+            if (values is null || string.IsNullOrWhiteSpace(values.BrandId))
+            {
+                return NotFound();
+            }
+
+            var updateDto = new UpdateBrandDto
+            {
+                BrandId = values.BrandId,
+                BrandName = values.BrandName,
+                ImageUrl = values.ImageUrl,
+                IsStatus = values.IsStatus
+            };
+
+            return View("~/Views/AdminLayout/UpdateBrand.cshtml", updateDto);
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         [Authorize(Roles = AdminRoles.AdminsOnly)]
-        public async Task<IActionResult> UpdateBrand(UpdateBrandDto updateBrandDto)
+        public async Task<IActionResult> UpdateBrand(
+            string id,
+            UpdateBrandDto updateBrandDto)
         {
+            if (!ObjectId.TryParse(id, out _) ||
+                !ObjectId.TryParse(updateBrandDto.BrandId, out _) ||
+                !string.Equals(
+                    id,
+                    updateBrandDto.BrandId,
+                    StringComparison.Ordinal))
+            {
+                return BadRequest();
+            }
+
+            if (!ModelState.IsValid)
+            {
+                return View(
+                    "~/Views/AdminLayout/UpdateBrand.cshtml",
+                    updateBrandDto);
+            }
+
             await _BrandService.UpdateBrandAsync(updateBrandDto);
             return RedirectToAction(nameof(Brandlist));
         }
