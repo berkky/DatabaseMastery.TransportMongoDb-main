@@ -16,7 +16,6 @@
         public string TestimonialCollectionName { get; set; }
         public string ProjectCollectionName { get; set; } = string.Empty;
         public string ShipmentCollectionName { get; set; } = string.Empty;
-
-
+        public string AdminUserCollectionName { get; set; } = string.Empty;
     }
 }
