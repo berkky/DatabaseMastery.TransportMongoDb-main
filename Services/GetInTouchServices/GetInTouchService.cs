@@ -1,6 +1,6 @@
-﻿using AutoMapper;
-using DatabaseMastery.TransportMongoDb.Dtos.GetInTouchDto;
+﻿using DatabaseMastery.TransportMongoDb.Dtos.GetInTouchDto;
 using DatabaseMastery.TransportMongoDb.Entities;
+using DatabaseMastery.TransportMongoDb.Mapping.Content;
 using DatabaseMastery.TransportMongoDb.Settings;
 using MongoDB.Driver;
 
@@ -9,25 +9,20 @@ namespace DatabaseMastery.TransportMongoDb.Services.GetInTouchServices
     public class GetInTouchService : IGetInTouchServices
     {
         private readonly IMongoCollection<GetInTouchSection> _getInTouchCollection;
-        private readonly IMapper _mapper;
 
-        public GetInTouchService(
-            IMapper mapper,
-            IDatabaseSettings databaseSettings)
+        public GetInTouchService(IDatabaseSettings databaseSettings)
         {
             var client = new MongoClient(databaseSettings.ConnectionString);
             var database = client.GetDatabase(databaseSettings.DatabaseName);
 
             _getInTouchCollection = database.GetCollection<GetInTouchSection>(
                 databaseSettings.GetInTouchCollectionName);
-
-            _mapper = mapper;
         }
 
         public async Task CreateGetInTouchAsync(
             CreateGetInTouchDto createGetInTouchDto)
         {
-            var value = _mapper.Map<GetInTouchSection>(createGetInTouchDto);
+            var value = GetInTouchMapper.ToEntity(createGetInTouchDto);
 
             await _getInTouchCollection.InsertOneAsync(value);
         }
@@ -44,7 +39,7 @@ namespace DatabaseMastery.TransportMongoDb.Services.GetInTouchServices
                 .Find(x => true)
                 .ToListAsync();
 
-            return _mapper.Map<List<ResultGetInTouchDto>>(values);
+            return GetInTouchMapper.ToResultList(values)!;
         }
 
         public async Task<GetGetInTouchByIdDto> GetGetInTouchByIdAsync(
@@ -54,13 +49,13 @@ namespace DatabaseMastery.TransportMongoDb.Services.GetInTouchServices
                 .Find(x => x.GetInTouchSectionId == id)
                 .FirstOrDefaultAsync();
 
-            return _mapper.Map<GetGetInTouchByIdDto>(value);
+            return GetInTouchMapper.ToGetById(value)!;
         }
 
         public async Task UpdateGetInTouchAsync(
             UpdateGetInTouchDto updateGetInTouchDto)
         {
-            var value = _mapper.Map<GetInTouchSection>(updateGetInTouchDto);
+            var value = GetInTouchMapper.ToEntity(updateGetInTouchDto);
 
             await _getInTouchCollection.FindOneAndReplaceAsync(
                 x => x.GetInTouchSectionId == updateGetInTouchDto.GetInTouchSectionId,

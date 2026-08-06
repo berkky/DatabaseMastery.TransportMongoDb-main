@@ -1,6 +1,6 @@
-using AutoMapper;
 using DatabaseMastery.TransportMongoDb.Dtos.HowItWorksDto;
 using DatabaseMastery.TransportMongoDb.Entities;
+using DatabaseMastery.TransportMongoDb.Mapping.Content;
 using DatabaseMastery.TransportMongoDb.Settings;
 using MongoDB.Driver;
 
@@ -9,24 +9,19 @@ namespace DatabaseMastery.TransportMongoDb.Services.HowItWorksServices
     public class HowItWorksService : IHowItWorksService
     {
         private readonly IMongoCollection<HowItWorks> _howItWorksCollection;
-        private readonly IMapper _mapper;
 
-        public HowItWorksService(
-            IMapper mapper,
-            IDatabaseSettings databaseSettings)
+        public HowItWorksService(IDatabaseSettings databaseSettings)
         {
             var client = new MongoClient(databaseSettings.ConnectionString);
             var database = client.GetDatabase(databaseSettings.DatabaseName);
 
             _howItWorksCollection = database.GetCollection<HowItWorks>(
                 databaseSettings.HowItWorksCollectionName);
-
-            _mapper = mapper;
         }
 
         public async Task CreateHowItWorksAsync(CreateHowItWorksDto createHowItWorksDto)
         {
-            var value = _mapper.Map<HowItWorks>(createHowItWorksDto);
+            var value = HowItWorksMapper.ToEntity(createHowItWorksDto);
             await _howItWorksCollection.InsertOneAsync(value);
         }
 
@@ -41,7 +36,7 @@ namespace DatabaseMastery.TransportMongoDb.Services.HowItWorksServices
                 .Find(x => true)
                 .ToListAsync();
 
-            return _mapper.Map<List<ResultHowItWorksDto>>(values);
+            return HowItWorksMapper.ToResultList(values)!;
         }
 
         public async Task<GetHowItWorksByIdDto> GetHowItWorksByIdAsync(string id)
@@ -50,12 +45,12 @@ namespace DatabaseMastery.TransportMongoDb.Services.HowItWorksServices
                 .Find(x => x.HowItWorksId == id)
                 .FirstOrDefaultAsync();
 
-            return _mapper.Map<GetHowItWorksByIdDto>(value);
+            return HowItWorksMapper.ToGetById(value)!;
         }
 
         public async Task UpdateHowItWorksAsync(UpdateHowItWorksDto updateHowItWorksDto)
         {
-            var value = _mapper.Map<HowItWorks>(updateHowItWorksDto);
+            var value = HowItWorksMapper.ToEntity(updateHowItWorksDto);
 
             await _howItWorksCollection.FindOneAndReplaceAsync(
                 x => x.HowItWorksId == updateHowItWorksDto.HowItWorksId,

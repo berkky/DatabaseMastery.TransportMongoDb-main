@@ -1,6 +1,6 @@
-using AutoMapper;
 using DatabaseMastery.TransportMongoDb.Dtos.ProjectDtos;
 using DatabaseMastery.TransportMongoDb.Entities;
+using DatabaseMastery.TransportMongoDb.Mapping.Content;
 using DatabaseMastery.TransportMongoDb.Settings;
 using MongoDB.Driver;
 
@@ -9,22 +9,19 @@ namespace DatabaseMastery.TransportMongoDb.Services.ProjectServices
     public class ProjectService : IProjectService
     {
         private readonly IMongoCollection<Project> _projectCollection;
-        private readonly IMapper _mapper;
 
-        public ProjectService(IMapper mapper, IDatabaseSettings databaseSettings)
+        public ProjectService(IDatabaseSettings databaseSettings)
         {
             var client = new MongoClient(databaseSettings.ConnectionString);
             var database = client.GetDatabase(databaseSettings.DatabaseName);
 
             _projectCollection = database.GetCollection<Project>(
                 databaseSettings.ProjectCollectionName);
-
-            _mapper = mapper;
         }
 
         public async Task CreateProjectAsync(CreateProjectDto createProjectDto)
         {
-            var value = _mapper.Map<Project>(createProjectDto);
+            var value = ProjectMapper.ToEntity(createProjectDto);
             await _projectCollection.InsertOneAsync(value);
         }
 
@@ -39,7 +36,7 @@ namespace DatabaseMastery.TransportMongoDb.Services.ProjectServices
                 .Find(x => true)
                 .ToListAsync();
 
-            return _mapper.Map<List<ResultProjectDto>>(values);
+            return ProjectMapper.ToResultList(values)!;
         }
 
         public async Task<GetProjectByIdDto> GetProjectByIdAsync(string id)
@@ -48,12 +45,12 @@ namespace DatabaseMastery.TransportMongoDb.Services.ProjectServices
                 .Find(x => x.ProjectId == id)
                 .FirstOrDefaultAsync();
 
-            return _mapper.Map<GetProjectByIdDto>(value);
+            return ProjectMapper.ToGetById(value)!;
         }
 
         public async Task UpdateProjectAsync(UpdateProjectDto updateProjectDto)
         {
-            var value = _mapper.Map<Project>(updateProjectDto);
+            var value = ProjectMapper.ToEntity(updateProjectDto);
 
             await _projectCollection.FindOneAndReplaceAsync(
                 x => x.ProjectId == updateProjectDto.ProjectId,
