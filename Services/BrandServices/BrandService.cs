@@ -1,6 +1,6 @@
-﻿using AutoMapper;
-using DatabaseMastery.TransportMongoDb.Dtos.BrandDtos;
+﻿using DatabaseMastery.TransportMongoDb.Dtos.BrandDtos;
 using DatabaseMastery.TransportMongoDb.Entities;
+using DatabaseMastery.TransportMongoDb.Mapping.Content;
 using DatabaseMastery.TransportMongoDb.Settings;
 using MongoDB.Driver;
 
@@ -9,24 +9,19 @@ namespace DatabaseMastery.TransportMongoDb.Services.BrandServices
     public class BrandService : IBrandService
     {
         private readonly IMongoCollection<Brand> _brandCollection;
-        private readonly IMapper _mapper;
 
-        public BrandService(
-            IMapper mapper,
-            IDatabaseSettings databaseSettings)
+        public BrandService(IDatabaseSettings databaseSettings)
         {
             var client = new MongoClient(databaseSettings.ConnectionString);
             var database = client.GetDatabase(databaseSettings.DatabaseName);
 
             _brandCollection = database.GetCollection<Brand>(
                 databaseSettings.BrandCollectionName);
-
-            _mapper = mapper;
         }
 
         public async Task CreateBrandAsync(CreateBrandDto createBrandDto)
         {
-            var value = _mapper.Map<Brand>(createBrandDto);
+            var value = BrandMapper.ToEntity(createBrandDto);
             await _brandCollection.InsertOneAsync(value);
         }
 
@@ -41,7 +36,7 @@ namespace DatabaseMastery.TransportMongoDb.Services.BrandServices
                 .Find(x => true)
                 .ToListAsync();
 
-            return _mapper.Map<List<ResultBrandDto>>(values);
+            return BrandMapper.ToResultList(values)!;
         }
 
         public async Task<GetBrandIdDto> GetBrandByIdAsync(string id)
@@ -50,12 +45,12 @@ namespace DatabaseMastery.TransportMongoDb.Services.BrandServices
                 .Find(x => x.BrandId == id)
                 .FirstOrDefaultAsync();
 
-            return _mapper.Map<GetBrandIdDto>(value);
+            return BrandMapper.ToGetById(value)!;
         }
 
         public async Task UpdateBrandAsync(UpdateBrandDto updateBrandDto)
         {
-            var value = _mapper.Map<Brand>(updateBrandDto);
+            var value = BrandMapper.ToEntity(updateBrandDto);
 
             await _brandCollection.FindOneAndReplaceAsync(
                 x => x.BrandId == updateBrandDto.BrandId,

@@ -1,8 +1,8 @@
 ﻿using DatabaseMastery.TransportMongoDb.Dtos.SliderDto;
 using DatabaseMastery.TransportMongoDb.Entities;
-using MongoDB.Driver;
-using AutoMapper;
+using DatabaseMastery.TransportMongoDb.Mapping.Content;
 using DatabaseMastery.TransportMongoDb.Settings;
+using MongoDB.Driver;
 
 namespace DatabaseMastery.TransportMongoDb.Services.SliderServices
 {
@@ -10,18 +10,15 @@ namespace DatabaseMastery.TransportMongoDb.Services.SliderServices
     {
         private readonly IMongoCollection<Slider> _sliderCollection;
 
-        private readonly IMapper _mapper;
-
-        public SliderService(IMapper mapper,IDatabaseSettings _databaseSettings)
+        public SliderService(IDatabaseSettings _databaseSettings)
         {
             var client=new MongoClient(_databaseSettings.ConnectionString);
             var database= client.GetDatabase(_databaseSettings.DatabaseName);
             _sliderCollection = database.GetCollection<Slider>(_databaseSettings.SliderCollectionName);
-            _mapper = mapper;
         }
         public async Task CreateSliderAsync(CreateSliderDto createSliderDto)
         {
-            var value = _mapper.Map<Slider>(createSliderDto);
+            var value = SliderMapper.ToEntity(createSliderDto);
             await _sliderCollection.InsertOneAsync(value);
         }
 
@@ -33,7 +30,7 @@ namespace DatabaseMastery.TransportMongoDb.Services.SliderServices
         public async Task<List<ResultSliderDto>> GetAllSlidersAsync()
         {
             var values=await _sliderCollection.Find(x => true).ToListAsync();
-            return _mapper.Map<List<ResultSliderDto>>(values);
+            return SliderMapper.ToResultList(values)!;
         }
 
         public async Task<GetSliderByIdDto> GetSliderByIdAsync(string id)
@@ -42,12 +39,12 @@ namespace DatabaseMastery.TransportMongoDb.Services.SliderServices
                 .Find(x => x.SliderId == id)
                 .FirstOrDefaultAsync();
 
-            return _mapper.Map<GetSliderByIdDto>(value);
+            return SliderMapper.ToGetById(value)!;
         }
 
         public async Task UpdateSliderAsync(UpdateSliderDto updateSliderDto)
         {
-            var value = _mapper.Map<Slider>(updateSliderDto);
+            var value = SliderMapper.ToEntity(updateSliderDto);
             await _sliderCollection.FindOneAndReplaceAsync(x => x.SliderId == updateSliderDto.SliderId, value);
         }
     }
