@@ -1,9 +1,12 @@
 using DatabaseMastery.TransportMongoDb.Dtos.TestimonialDtos;
+using DatabaseMastery.TransportMongoDb.Security;
 using DatabaseMastery.TransportMongoDb.Services.TestimonialServices;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace DatabaseMastery.TransportMongoDb.Controllers
 {
+    [Authorize(Roles = AdminRoles.AllAdminRoles)]
     public class TestimonialController : Controller
     {
         private readonly ITestimonialService _testimonialService;
@@ -20,12 +23,14 @@ namespace DatabaseMastery.TransportMongoDb.Controllers
         }
 
         [HttpGet]
+        [Authorize(Roles = AdminRoles.AdminsOnly)]
         public IActionResult CreateTestimonial()
         {
             return View("~/Views/AdminLayout/CreateTestimonial.cshtml");
         }
 
         [HttpPost]
+        [Authorize(Roles = AdminRoles.AdminsOnly)]
         public async Task<IActionResult> CreateTestimonial(
             CreateTestimonialDto createTestimonialDto)
         {
@@ -33,6 +38,7 @@ namespace DatabaseMastery.TransportMongoDb.Controllers
             return RedirectToAction(nameof(TestimonialList));
         }
 
+        [Authorize(Roles = AdminRoles.AdminsOnly)]
         public async Task<IActionResult> DeleteTestimonial(string id)
         {
             await _testimonialService.DeleteTestimonialAsync(id);
@@ -40,6 +46,7 @@ namespace DatabaseMastery.TransportMongoDb.Controllers
         }
 
         [HttpGet]
+        [Authorize(Roles = AdminRoles.AdminsOnly)]
         public async Task<IActionResult> UpdateTestimonial(string id)
         {
             var values = await _testimonialService.GetTestimonialByIdAsync(id);
@@ -47,6 +54,7 @@ namespace DatabaseMastery.TransportMongoDb.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = AdminRoles.AdminsOnly)]
         public async Task<IActionResult> UpdateTestimonial(
             UpdateTestimonialDto updateTestimonialDto)
         {

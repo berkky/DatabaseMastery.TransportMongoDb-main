@@ -1,9 +1,12 @@
 using DatabaseMastery.TransportMongoDb.Dtos.ProjectDtos;
+using DatabaseMastery.TransportMongoDb.Security;
 using DatabaseMastery.TransportMongoDb.Services.ProjectServices;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace DatabaseMastery.TransportMongoDb.Controllers
 {
+    [Authorize(Roles = AdminRoles.AllAdminRoles)]
     public class ProjectController : Controller
     {
         private readonly IProjectService _projectService;
@@ -20,12 +23,14 @@ namespace DatabaseMastery.TransportMongoDb.Controllers
         }
 
         [HttpGet]
+        [Authorize(Roles = AdminRoles.AdminsOnly)]
         public IActionResult CreateProject()
         {
             return View("~/Views/AdminLayout/CreateProject.cshtml");
         }
 
         [HttpPost]
+        [Authorize(Roles = AdminRoles.AdminsOnly)]
         public async Task<IActionResult> CreateProject(
             CreateProjectDto createProjectDto)
         {
@@ -33,6 +38,7 @@ namespace DatabaseMastery.TransportMongoDb.Controllers
             return RedirectToAction(nameof(ProjectList));
         }
 
+        [Authorize(Roles = AdminRoles.AdminsOnly)]
         public async Task<IActionResult> DeleteProject(string id)
         {
             await _projectService.DeleteProjectAsync(id);
@@ -40,6 +46,7 @@ namespace DatabaseMastery.TransportMongoDb.Controllers
         }
 
         [HttpGet]
+        [Authorize(Roles = AdminRoles.AdminsOnly)]
         public async Task<IActionResult> UpdateProject(string id)
         {
             var values = await _projectService.GetProjectByIdAsync(id);
@@ -47,6 +54,7 @@ namespace DatabaseMastery.TransportMongoDb.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = AdminRoles.AdminsOnly)]
         public async Task<IActionResult> UpdateProject(
             UpdateProjectDto updateProjectDto)
         {

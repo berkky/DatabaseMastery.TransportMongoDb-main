@@ -1,9 +1,12 @@
 ﻿using DatabaseMastery.TransportMongoDb.Dtos.OfferDto;
+using DatabaseMastery.TransportMongoDb.Security;
 using DatabaseMastery.TransportMongoDb.Services.OfferServices;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace DatabaseMastery.TransportMongoDb.Controllers
 {
+    [Authorize(Roles = AdminRoles.AllAdminRoles)]
     public class OfferController : Controller
     {
         private readonly IOfferService _OfferService;
@@ -20,18 +23,21 @@ namespace DatabaseMastery.TransportMongoDb.Controllers
         }
 
         [HttpGet]
+        [Authorize(Roles = AdminRoles.AdminsOnly)]
         public IActionResult CreateOffer()
         {
             return View("~/Views/AdminLayout/CreateOffer.cshtml");
         }
 
         [HttpPost]
+        [Authorize(Roles = AdminRoles.AdminsOnly)]
         public async Task<IActionResult> CreateOffer(CreateOfferDto createOfferDto)
         {
             await _OfferService.CreateOfferAsync(createOfferDto);
             return RedirectToAction(nameof(Offerlist));
         }
 
+        [Authorize(Roles = AdminRoles.AdminsOnly)]
         public async Task<IActionResult> DeleteOffer(string id)
         {
             await _OfferService.DeleteOfferAsync(id);
@@ -39,6 +45,7 @@ namespace DatabaseMastery.TransportMongoDb.Controllers
         }
 
         [HttpGet]
+        [Authorize(Roles = AdminRoles.AdminsOnly)]
         public async Task<IActionResult> UpdateOffer(string id)
         {
             var values = await _OfferService.GetOfferByIdAsync(id);
@@ -46,6 +53,7 @@ namespace DatabaseMastery.TransportMongoDb.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = AdminRoles.AdminsOnly)]
         public async Task<IActionResult> UpdateOffer(UpdateOfferDto updateOfferDto)
         {
             await _OfferService.UpdateOfferAsync(updateOfferDto);
@@ -53,4 +61,3 @@ namespace DatabaseMastery.TransportMongoDb.Controllers
         }
     }
 }
-

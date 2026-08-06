@@ -1,9 +1,12 @@
-﻿ using DatabaseMastery.TransportMongoDb.Dtos.AboutDto;
+﻿using DatabaseMastery.TransportMongoDb.Dtos.AboutDto;
+using DatabaseMastery.TransportMongoDb.Security;
 using DatabaseMastery.TransportMongoDb.Services.AboutServices;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace DatabaseMastery.TransportMongoDb.Controllers
 {
+    [Authorize(Roles = AdminRoles.AllAdminRoles)]
     public class AboutController : Controller
     {
         private readonly IAboutService _AboutService;
@@ -20,18 +23,21 @@ namespace DatabaseMastery.TransportMongoDb.Controllers
         }
 
         [HttpGet]
+        [Authorize(Roles = AdminRoles.AdminsOnly)]
         public IActionResult CreateAbout()
         {
             return View("~/Views/AdminLayout/CreateAbout.cshtml");
         }
 
         [HttpPost]
+        [Authorize(Roles = AdminRoles.AdminsOnly)]
         public async Task<IActionResult> CreateAbout(CreateAboutDto createAboutDto)
         {
             await _AboutService.CreateAboutAsync(createAboutDto);
             return RedirectToAction(nameof(Aboutlist));
         }
 
+        [Authorize(Roles = AdminRoles.AdminsOnly)]
         public async Task<IActionResult> DeleteAbout(string id)
         {
             await _AboutService.DeleteAboutAsync(id);
@@ -39,6 +45,7 @@ namespace DatabaseMastery.TransportMongoDb.Controllers
         }
 
         [HttpGet]
+        [Authorize(Roles = AdminRoles.AdminsOnly)]
         public async Task<IActionResult> UpdateAbout(string id)
         {
             var values = await _AboutService.GetAboutByIdAsync(id);
@@ -46,6 +53,7 @@ namespace DatabaseMastery.TransportMongoDb.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = AdminRoles.AdminsOnly)]
         public async Task<IActionResult> UpdateAbout(UpdateAboutDto updateAboutDto)
         {
             await _AboutService.UpdateAboutAsync(updateAboutDto);

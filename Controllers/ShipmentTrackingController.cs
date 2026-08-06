@@ -1,10 +1,13 @@
 using DatabaseMastery.TransportMongoDb.Dtos.ShipmentTrackingDtos;
+using DatabaseMastery.TransportMongoDb.Security;
 using DatabaseMastery.TransportMongoDb.Services.ShipmentServices;
 using DatabaseMastery.TransportMongoDb.Services.ShipmentTrackingServices;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace DatabaseMastery.TransportMongoDb.Controllers
 {
+    [Authorize(Roles = AdminRoles.AllAdminRoles)]
     public class ShipmentTrackingController : Controller
     {
         private readonly IShipmentTrackingService _trackingService;
@@ -28,6 +31,7 @@ namespace DatabaseMastery.TransportMongoDb.Controllers
         }
 
         [HttpGet]
+        [Authorize(Roles = AdminRoles.OperatorsAndAbove)]
         public async Task<IActionResult> AddTracking(string trackingNumber)
         {
             if (!await PopulateShipmentSummaryAsync(trackingNumber))
@@ -43,6 +47,7 @@ namespace DatabaseMastery.TransportMongoDb.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = AdminRoles.OperatorsAndAbove)]
         public async Task<IActionResult> AddTracking(
             CreateShipmentTrackingDto createDto)
         {
@@ -67,6 +72,7 @@ namespace DatabaseMastery.TransportMongoDb.Controllers
         }
 
         [HttpGet]
+        [Authorize(Roles = AdminRoles.OperatorsAndAbove)]
         public async Task<IActionResult> UpdateTracking(
             string trackingNumber, int index)
         {
@@ -97,6 +103,7 @@ namespace DatabaseMastery.TransportMongoDb.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = AdminRoles.OperatorsAndAbove)]
         public async Task<IActionResult> UpdateTracking(
             UpdateShipmentTrackingDto updateDto)
         {
@@ -120,6 +127,7 @@ namespace DatabaseMastery.TransportMongoDb.Controllers
             });
         }
 
+        [Authorize(Roles = AdminRoles.AdminsOnly)]
         public async Task<IActionResult> DeleteTracking(
             string trackingNumber, int index)
         {

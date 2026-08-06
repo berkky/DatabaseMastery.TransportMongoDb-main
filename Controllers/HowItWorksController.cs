@@ -1,9 +1,12 @@
 using DatabaseMastery.TransportMongoDb.Dtos.HowItWorksDto;
+using DatabaseMastery.TransportMongoDb.Security;
 using DatabaseMastery.TransportMongoDb.Services.HowItWorksServices;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace DatabaseMastery.TransportMongoDb.Controllers
 {
+    [Authorize(Roles = AdminRoles.AllAdminRoles)]
     public class HowItWorksController : Controller
     {
         private readonly IHowItWorksService _howItWorksService;
@@ -20,12 +23,14 @@ namespace DatabaseMastery.TransportMongoDb.Controllers
         }
 
         [HttpGet]
+        [Authorize(Roles = AdminRoles.AdminsOnly)]
         public IActionResult CreateHowItWorks()
         {
             return View("~/Views/AdminLayout/CreateHowItWorks.cshtml");
         }
 
         [HttpPost]
+        [Authorize(Roles = AdminRoles.AdminsOnly)]
         public async Task<IActionResult> CreateHowItWorks(
             CreateHowItWorksDto createHowItWorksDto)
         {
@@ -33,6 +38,7 @@ namespace DatabaseMastery.TransportMongoDb.Controllers
             return RedirectToAction(nameof(HowItWorkslist));
         }
 
+        [Authorize(Roles = AdminRoles.AdminsOnly)]
         public async Task<IActionResult> DeleteHowItWorks(string id)
         {
             await _howItWorksService.DeleteHowItWorksAsync(id);
@@ -40,6 +46,7 @@ namespace DatabaseMastery.TransportMongoDb.Controllers
         }
 
         [HttpGet]
+        [Authorize(Roles = AdminRoles.AdminsOnly)]
         public async Task<IActionResult> UpdateHowItWorks(string id)
         {
             var values = await _howItWorksService.GetHowItWorksByIdAsync(id);
@@ -47,6 +54,7 @@ namespace DatabaseMastery.TransportMongoDb.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = AdminRoles.AdminsOnly)]
         public async Task<IActionResult> UpdateHowItWorks(
             UpdateHowItWorksDto updateHowItWorksDto)
         {

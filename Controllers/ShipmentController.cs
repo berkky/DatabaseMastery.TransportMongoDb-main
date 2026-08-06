@@ -1,9 +1,12 @@
 using DatabaseMastery.TransportMongoDb.Dtos.ShipmentDtos;
+using DatabaseMastery.TransportMongoDb.Security;
 using DatabaseMastery.TransportMongoDb.Services.ShipmentServices;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace DatabaseMastery.TransportMongoDb.Controllers
 {
+    [Authorize(Roles = AdminRoles.AllAdminRoles)]
     public class ShipmentController : Controller
     {
         private readonly IShipmentService _shipmentService;
@@ -20,12 +23,14 @@ namespace DatabaseMastery.TransportMongoDb.Controllers
         }
 
         [HttpGet]
+        [Authorize(Roles = AdminRoles.OperatorsAndAbove)]
         public IActionResult CreateShipment()
         {
             return View("~/Views/AdminLayout/CreateShipment.cshtml");
         }
 
         [HttpPost]
+        [Authorize(Roles = AdminRoles.OperatorsAndAbove)]
         public async Task<IActionResult> CreateShipment(
             CreateShipmentDto createShipmentDto)
         {
@@ -34,6 +39,7 @@ namespace DatabaseMastery.TransportMongoDb.Controllers
         }
 
         [HttpGet]
+        [Authorize(Roles = AdminRoles.AdminsOnly)]
         public async Task<IActionResult> DeleteShipment(string id)
         {
             await _shipmentService.DeleteShipmentAsync(id);
@@ -41,6 +47,7 @@ namespace DatabaseMastery.TransportMongoDb.Controllers
         }
 
         [HttpGet]
+        [Authorize(Roles = AdminRoles.OperatorsAndAbove)]
         public async Task<IActionResult> UpdateShipment(string id)
         {
             var values = await _shipmentService.GetShipmentByIdAsync(id);
@@ -48,6 +55,7 @@ namespace DatabaseMastery.TransportMongoDb.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = AdminRoles.OperatorsAndAbove)]
         public async Task<IActionResult> UpdateShipment(
             UpdateShipmentDto updateShipmentDto)
         {

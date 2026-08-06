@@ -1,9 +1,12 @@
-﻿using DatabaseMastery.TransportMongoDb.Dtos.BrandDtos   ;
+﻿using DatabaseMastery.TransportMongoDb.Dtos.BrandDtos;
+using DatabaseMastery.TransportMongoDb.Security;
 using DatabaseMastery.TransportMongoDb.Services.BrandServices;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace DatabaseMastery.TransportMongoDb.Controllers
 {
+    [Authorize(Roles = AdminRoles.AllAdminRoles)]
     public class BrandController : Controller
     {
         private readonly IBrandService _BrandService;
@@ -20,18 +23,21 @@ namespace DatabaseMastery.TransportMongoDb.Controllers
         }
 
         [HttpGet]
+        [Authorize(Roles = AdminRoles.AdminsOnly)]
         public IActionResult CreateBrand()
         {
             return View("~/Views/AdminLayout/CreateBrand.cshtml");
         }
 
         [HttpPost]
+        [Authorize(Roles = AdminRoles.AdminsOnly)]
         public async Task<IActionResult> CreateBrand(CreateBrandDto createBrandDto)
         {
             await _BrandService.CreateBrandAsync(createBrandDto);
             return RedirectToAction(nameof(Brandlist));
         }
 
+        [Authorize(Roles = AdminRoles.AdminsOnly)]
         public async Task<IActionResult> DeleteBrand(string id)
         {
             await _BrandService.DeleteBrandAsync(id);
@@ -39,6 +45,7 @@ namespace DatabaseMastery.TransportMongoDb.Controllers
         }
 
         [HttpGet]
+        [Authorize(Roles = AdminRoles.AdminsOnly)]
         public async Task<IActionResult> UpdateBrand(string id)
         {
             var values = await _BrandService.GetBrandByIdAsync(id);
@@ -46,6 +53,7 @@ namespace DatabaseMastery.TransportMongoDb.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = AdminRoles.AdminsOnly)]
         public async Task<IActionResult> UpdateBrand(UpdateBrandDto updateBrandDto)
         {
             await _BrandService.UpdateBrandAsync(updateBrandDto);
@@ -53,4 +61,3 @@ namespace DatabaseMastery.TransportMongoDb.Controllers
         }
     }
 }
-
