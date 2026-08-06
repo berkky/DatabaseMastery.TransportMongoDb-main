@@ -11,5 +11,14 @@ namespace DatabaseMastery.TransportMongoDb.Services.AdminUserServices
         Task CreateAsync(AdminUser adminUser);
 
         Task EnsureIndexesAsync();
+
+        Task<AdminLoginFailureResult> RegisterFailedLoginAsync(
+            string adminUserId,
+            DateTime utcNow);
+
+        Task RegisterSuccessfulLoginAsync(
+            string adminUserId,
+            DateTime utcNow,
+            string? newPasswordHash = null);
     }
 }

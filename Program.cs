@@ -33,6 +33,10 @@ builder.Services.AddScoped<IAdminUserService, AdminUserService>();
 builder.Services.Configure<DatabaseSettings>(builder.Configuration.GetSection("DatabaseSettings"));
 builder.Services.Configure<AdminBootstrapOptions>(
     builder.Configuration.GetSection(AdminBootstrapOptions.SectionName));
+builder.Services.AddOptions<AdminLoginSecurityOptions>()
+    .Bind(builder.Configuration.GetSection(AdminLoginSecurityOptions.SectionName))
+    .ValidateDataAnnotations()
+    .ValidateOnStart();
 builder.Services.AddScoped<IDatabaseSettings>(sp =>
     sp.GetRequiredService<IOptions<DatabaseSettings>>().Value);
 builder.Services.AddSingleton<IMongoClient>(sp =>

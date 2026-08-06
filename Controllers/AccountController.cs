@@ -86,9 +86,26 @@ namespace DatabaseMastery.TransportMongoDb.Controllers
                 PasswordVerificationResult.Success or
                 PasswordVerificationResult.SuccessRehashNeeded))
             {
+                await _adminUserService.RegisterFailedLoginAsync(
+                    adminUser.AdminUserId,
+                    DateTime.UtcNow);
+
                 ModelState.AddModelError(string.Empty, GenericLoginError);
                 return View(model);
             }
+
+            string? newPasswordHash = null;
+            if (verification == PasswordVerificationResult.SuccessRehashNeeded)
+            {
+                newPasswordHash = _credentialService.HashPassword(
+                    adminUser,
+                    model.Password);
+            }
+
+            await _adminUserService.RegisterSuccessfulLoginAsync(
+                adminUser.AdminUserId,
+                DateTime.UtcNow,
+                newPasswordHash);
 
             var claims = new List<Claim>
             {
