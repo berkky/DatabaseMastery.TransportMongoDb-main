@@ -1,4 +1,4 @@
-@model GetGetInTouchByIdDto
+@model UpdateGetInTouchDto
 
 @{
     ViewData["Title"] = "İletişim Alanı Güncelle";
@@ -16,6 +16,7 @@
                     <div class="card-body">
                         <form asp-controller="GetInTouch"
                               asp-action="UpdateGetInTouch"
+                              asp-route-id="@Model.GetInTouchSectionId"
                               method="post">
                             <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
                             <input asp-for="GetInTouchSectionId" type="hidden" />
@@ -73,6 +74,7 @@
                             <div class="form-check mb-3">
                                 <input asp-for="Status" class="form-check-input" />
                                 <label asp-for="Status" class="form-check-label">Ana sayfada göster</label>
+                                <span asp-validation-for="Status" class="text-danger"></span>
                             </div>
 
                             <button type="submit" class="btn btn-primary">Güncelle</button>
