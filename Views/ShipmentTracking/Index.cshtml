@@ -111,13 +111,20 @@
                                                class="btn btn-sm btn-primary">
                                                 Güncelle
                                             </a>
-                                            <a asp-controller="ShipmentTracking"
-                                               asp-action="DeleteTracking"
-                                               asp-route-trackingNumber="@trackingNumber"
-                                               asp-route-index="@index"
-                                               class="btn btn-sm btn-danger">
-                                                Sil
-                                            </a>
+                                            <form asp-controller="ShipmentTracking"
+                                                  asp-action="DeleteTracking"
+                                                  method="post"
+                                                  class="d-inline"
+                                                  onsubmit="return confirm('Bu kaydı silmek istediğinize emin misiniz?');">
+                                                @Html.AntiForgeryToken()
+                                                <input type="hidden" name="trackingNumber" value="@trackingNumber" />
+                                                <input type="hidden" name="index" value="@index" />
+                                                <button type="submit"
+                                                        class="btn btn-sm btn-danger"
+                                                        aria-label="Kargo hareketini sil">
+                                                    Sil
+                                                </button>
+                                            </form>
                                         </div>
                                     </div>
                                 </li>

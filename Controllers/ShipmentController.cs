@@ -38,7 +38,8 @@ namespace DatabaseMastery.TransportMongoDb.Controllers
             return RedirectToAction(nameof(ShipmentList));
         }
 
-        [HttpGet]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
         [Authorize(Roles = AdminRoles.AdminsOnly)]
         public async Task<IActionResult> DeleteShipment(string id)
         {

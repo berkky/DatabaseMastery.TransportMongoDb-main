@@ -127,6 +127,8 @@ namespace DatabaseMastery.TransportMongoDb.Controllers
             });
         }
 
+        [HttpPost]
+        [ValidateAntiForgeryToken]
         [Authorize(Roles = AdminRoles.AdminsOnly)]
         public async Task<IActionResult> DeleteTracking(
             string trackingNumber, int index)
