@@ -1,11 +1,14 @@
+using System.Globalization;
 using System.Security.Claims;
 using DatabaseMastery.TransportMongoDb.Security;
+using DatabaseMastery.TransportMongoDb.Services.AdminLoginRateLimiting;
 using DatabaseMastery.TransportMongoDb.Services.AdminUserServices;
 using DatabaseMastery.TransportMongoDb.ViewModels;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace DatabaseMastery.TransportMongoDb.Controllers
 {
@@ -14,16 +17,21 @@ namespace DatabaseMastery.TransportMongoDb.Controllers
         public const string AuthenticationScheme = "TransportAdmin";
 
         private const string GenericLoginError = "Kullanıcı adı veya parola hatalı.";
+        private const string RateLimitError =
+            "Çok fazla giriş denemesi. Lütfen kısa süre sonra tekrar deneyin.";
 
         private readonly IAdminUserService _adminUserService;
         private readonly IAdminCredentialService _credentialService;
+        private readonly IAdminLoginRateLimiter _loginRateLimiter;
 
         public AccountController(
             IAdminUserService adminUserService,
-            IAdminCredentialService credentialService)
+            IAdminCredentialService credentialService,
+            IAdminLoginRateLimiter loginRateLimiter)
         {
             _adminUserService = adminUserService;
             _credentialService = credentialService;
+            _loginRateLimiter = loginRateLimiter;
         }
 
         [AllowAnonymous]
@@ -43,10 +51,12 @@ namespace DatabaseMastery.TransportMongoDb.Controllers
         [AllowAnonymous]
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [EnableRateLimiting(AdminRateLimitPolicies.AdminLoginIp)]
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public async Task<IActionResult> Login(
             AdminLoginViewModel model,
-            string? returnUrl = null)
+            string? returnUrl = null,
+            CancellationToken cancellationToken = default)
         {
             ViewData["ReturnUrl"] = returnUrl;
 
@@ -63,6 +73,25 @@ namespace DatabaseMastery.TransportMongoDb.Controllers
             catch (ArgumentException)
             {
                 ModelState.AddModelError(string.Empty, GenericLoginError);
+                return View(model);
+            }
+
+            var rateLimit = await _loginRateLimiter.AcquireAsync(
+                normalizedUsername,
+                HttpContext.Connection.RemoteIpAddress,
+                cancellationToken);
+
+            if (!rateLimit.IsAllowed)
+            {
+                Response.StatusCode = StatusCodes.Status429TooManyRequests;
+
+                var retrySeconds = Math.Max(
+                    1,
+                    (int)Math.Ceiling(rateLimit.RetryAfter.TotalSeconds));
+                Response.Headers.RetryAfter =
+                    retrySeconds.ToString(CultureInfo.InvariantCulture);
+
+                ModelState.AddModelError(string.Empty, RateLimitError);
                 return View(model);
             }
 

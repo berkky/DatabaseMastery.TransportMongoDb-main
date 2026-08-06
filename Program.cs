@@ -1,18 +1,22 @@
+using System.Globalization;
+using System.Threading.RateLimiting;
 using DatabaseMastery.TransportMongoDb.Entities;
-using DatabaseMastery.TransportMongoDb.Services.SliderServices;
-using DatabaseMastery.TransportMongoDb.Settings;
 using DatabaseMastery.TransportMongoDb.Security;
+using DatabaseMastery.TransportMongoDb.Services.AboutServices;
+using DatabaseMastery.TransportMongoDb.Services.AdminLoginRateLimiting;
 using DatabaseMastery.TransportMongoDb.Services.AdminUserServices;
 using DatabaseMastery.TransportMongoDb.Services.BrandServices;
-using DatabaseMastery.TransportMongoDb.Services.OfferServices;
-using DatabaseMastery.TransportMongoDb.Services.AboutServices;
 using DatabaseMastery.TransportMongoDb.Services.GetInTouchServices;
 using DatabaseMastery.TransportMongoDb.Services.HowItWorksServices;
+using DatabaseMastery.TransportMongoDb.Services.OfferServices;
 using DatabaseMastery.TransportMongoDb.Services.ProjectServices;
 using DatabaseMastery.TransportMongoDb.Services.ShipmentServices;
 using DatabaseMastery.TransportMongoDb.Services.ShipmentTrackingServices;
+using DatabaseMastery.TransportMongoDb.Services.SliderServices;
 using DatabaseMastery.TransportMongoDb.Services.TestimonialServices;
+using DatabaseMastery.TransportMongoDb.Settings;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.Extensions.Options;
 using MongoDB.Driver;
 
@@ -37,6 +41,10 @@ builder.Services.AddOptions<AdminLoginSecurityOptions>()
     .Bind(builder.Configuration.GetSection(AdminLoginSecurityOptions.SectionName))
     .ValidateDataAnnotations()
     .ValidateOnStart();
+builder.Services.AddOptions<AdminLoginRateLimitOptions>()
+    .Bind(builder.Configuration.GetSection(AdminLoginRateLimitOptions.SectionName))
+    .ValidateDataAnnotations()
+    .ValidateOnStart();
 builder.Services.AddScoped<IDatabaseSettings>(sp =>
     sp.GetRequiredService<IOptions<DatabaseSettings>>().Value);
 builder.Services.AddSingleton<IMongoClient>(sp =>
@@ -46,7 +54,55 @@ builder.Services.AddSingleton<IMongoClient>(sp =>
 });
 builder.Services.AddSingleton<IPasswordHasher<AdminUser>, PasswordHasher<AdminUser>>();
 builder.Services.AddSingleton<IAdminCredentialService, AdminCredentialService>();
+builder.Services.AddSingleton<IAdminLoginRateLimiter, AdminLoginRateLimiter>();
 builder.Services.AddHostedService<AdminBootstrapHostedService>();
+
+builder.Services.AddRateLimiter(options =>
+{
+    options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+    options.OnRejected = async (context, cancellationToken) =>
+    {
+        var response = context.HttpContext.Response;
+        if (response.HasStarted)
+        {
+            return;
+        }
+
+        response.StatusCode = StatusCodes.Status429TooManyRequests;
+
+        if (context.Lease.TryGetMetadata(MetadataName.RetryAfter, out var retryAfter))
+        {
+            var retrySeconds = Math.Max(1, (int)Math.Ceiling(retryAfter.TotalSeconds));
+            response.Headers.RetryAfter =
+                retrySeconds.ToString(CultureInfo.InvariantCulture);
+        }
+
+        response.ContentType = "text/plain; charset=utf-8";
+        await response.WriteAsync(
+            "Çok fazla giriş denemesi. Lütfen kısa süre sonra tekrar deneyin.",
+            cancellationToken);
+    };
+
+    options.AddPolicy(AdminRateLimitPolicies.AdminLoginIp, httpContext =>
+    {
+        var rateOptions = httpContext.RequestServices
+            .GetRequiredService<IOptions<AdminLoginRateLimitOptions>>()
+            .Value;
+
+        var partitionKey = httpContext.Connection.RemoteIpAddress?.ToString()
+            ?? "unknown";
+
+        return RateLimitPartition.GetFixedWindowLimiter(
+            partitionKey,
+            _ => new FixedWindowRateLimiterOptions
+            {
+                PermitLimit = rateOptions.IpPermitLimit,
+                Window = TimeSpan.FromSeconds(rateOptions.IpWindowSeconds),
+                QueueLimit = 0,
+                AutoReplenishment = true
+            });
+    });
+});
 
 const string transportAdminScheme = "TransportAdmin";
 
@@ -86,6 +142,8 @@ if (!app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseRouting();
+
+app.UseRateLimiter();
 
 app.UseAuthentication();
 app.UseAuthorization();
