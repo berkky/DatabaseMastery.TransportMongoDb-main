@@ -1,4 +1,4 @@
-@model GetShipmentByIdDto
+@model UpdateShipmentDto
 
 @{
     ViewData["Title"] = "Gönderi Güncelle";
@@ -20,6 +20,7 @@
                     <div class="card-body">
                         <form asp-controller="Shipment"
                               asp-action="UpdateShipment"
+                              asp-route-id="@Model.ShipmentId"
                               method="post">
                             <div asp-validation-summary="ModelOnly"
                                  class="text-danger mb-3"></div>

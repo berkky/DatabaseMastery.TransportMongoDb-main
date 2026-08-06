@@ -3,6 +3,7 @@ using DatabaseMastery.TransportMongoDb.Security;
 using DatabaseMastery.TransportMongoDb.Services.ShipmentServices;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using MongoDB.Bson;
 
 namespace DatabaseMastery.TransportMongoDb.Controllers
 {
@@ -30,10 +31,25 @@ namespace DatabaseMastery.TransportMongoDb.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         [Authorize(Roles = AdminRoles.OperatorsAndAbove)]
         public async Task<IActionResult> CreateShipment(
             CreateShipmentDto createShipmentDto)
         {
+            if (createShipmentDto.CreatedDate == default)
+            {
+                ModelState.AddModelError(
+                    nameof(createShipmentDto.CreatedDate),
+                    "Oluşturma tarihi gereklidir.");
+            }
+
+            if (!ModelState.IsValid)
+            {
+                return View(
+                    "~/Views/AdminLayout/CreateShipment.cshtml",
+                    createShipmentDto);
+            }
+
             await _shipmentService.CreateShipmentAsync(createShipmentDto);
             return RedirectToAction(nameof(ShipmentList));
         }
@@ -51,15 +67,68 @@ namespace DatabaseMastery.TransportMongoDb.Controllers
         [Authorize(Roles = AdminRoles.OperatorsAndAbove)]
         public async Task<IActionResult> UpdateShipment(string id)
         {
+            if (!ObjectId.TryParse(id, out _))
+            {
+                return NotFound();
+            }
+
             var values = await _shipmentService.GetShipmentByIdAsync(id);
-            return View("~/Views/AdminLayout/UpdateShipment.cshtml", values);
+            if (values is null || string.IsNullOrWhiteSpace(values.ShipmentId))
+            {
+                return NotFound();
+            }
+
+            var updateDto = new UpdateShipmentDto
+            {
+                ShipmentId = values.ShipmentId,
+                TrackingNumber = values.TrackingNumber,
+                SenderName = values.SenderName,
+                SenderPhone = values.SenderPhone,
+                ReceiverName = values.ReceiverName,
+                ReceiverPhone = values.ReceiverPhone,
+                DepartureCity = values.DepartureCity,
+                DepartureDistrict = values.DepartureDistrict,
+                ArrivalCity = values.ArrivalCity,
+                ArrivalDistrict = values.ArrivalDistrict,
+                Address = values.Address,
+                CreatedDate = values.CreatedDate,
+                CurrentStatus = values.CurrentStatus
+            };
+
+            return View("~/Views/AdminLayout/UpdateShipment.cshtml", updateDto);
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         [Authorize(Roles = AdminRoles.OperatorsAndAbove)]
         public async Task<IActionResult> UpdateShipment(
+            string id,
             UpdateShipmentDto updateShipmentDto)
         {
+            if (!ObjectId.TryParse(id, out _) ||
+                !ObjectId.TryParse(updateShipmentDto.ShipmentId, out _) ||
+                !string.Equals(
+                    id,
+                    updateShipmentDto.ShipmentId,
+                    StringComparison.Ordinal))
+            {
+                return BadRequest();
+            }
+
+            if (updateShipmentDto.CreatedDate == default)
+            {
+                ModelState.AddModelError(
+                    nameof(updateShipmentDto.CreatedDate),
+                    "Oluşturma tarihi gereklidir.");
+            }
+
+            if (!ModelState.IsValid)
+            {
+                return View(
+                    "~/Views/AdminLayout/UpdateShipment.cshtml",
+                    updateShipmentDto);
+            }
+
             await _shipmentService.UpdateShipmentAsync(updateShipmentDto);
             return RedirectToAction(nameof(ShipmentList));
         }
