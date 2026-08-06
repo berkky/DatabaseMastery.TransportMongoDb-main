@@ -1,8 +1,9 @@
-﻿@model CreateBrandDto
+@model CreateBrandDto
 @*
     For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 *@
 @{
+    Layout = "~/Views/AdminLayout/Index.cshtml";
 }
 
 <style>
@@ -965,3 +966,6 @@
         imageUrlInput.style.borderColor = '';
     });
 </script>
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

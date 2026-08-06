@@ -1,4 +1,4 @@
-﻿@model UpdateAboutDto
+@model UpdateAboutDto
 @{
     Layout = "~/Views/AdminLayout/Index.cshtml";
 }
@@ -994,4 +994,6 @@
         }
     });
 </script>
-
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
