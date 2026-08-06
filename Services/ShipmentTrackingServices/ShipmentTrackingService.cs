@@ -1,6 +1,6 @@
-using AutoMapper;
 using DatabaseMastery.TransportMongoDb.Dtos.ShipmentTrackingDtos;
 using DatabaseMastery.TransportMongoDb.Entities;
+using DatabaseMastery.TransportMongoDb.Mapping;
 using DatabaseMastery.TransportMongoDb.Settings;
 using MongoDB.Driver;
 
@@ -9,17 +9,14 @@ namespace DatabaseMastery.TransportMongoDb.Services.ShipmentTrackingServices
     public class ShipmentTrackingService : IShipmentTrackingService
     {
         private readonly IMongoCollection<Shipment> _shipmentCollection;
-        private readonly IMapper _mapper;
 
-        public ShipmentTrackingService(IMapper mapper, IDatabaseSettings databaseSettings)
+        public ShipmentTrackingService(IDatabaseSettings databaseSettings)
         {
             var client = new MongoClient(databaseSettings.ConnectionString);
             var database = client.GetDatabase(databaseSettings.DatabaseName);
 
             _shipmentCollection = database.GetCollection<Shipment>(
                 databaseSettings.ShipmentCollectionName);
-
-            _mapper = mapper;
         }
 
         public async Task CreateTrackingAsync(CreateShipmentTrackingDto createDto)
@@ -33,7 +30,7 @@ namespace DatabaseMastery.TransportMongoDb.Services.ShipmentTrackingServices
                 return;
             }
 
-            var tracking = _mapper.Map<ShipmentTracking>(createDto);
+            var tracking = ShipmentTrackingMapper.ToEntity(createDto);
             var filter = Builders<Shipment>.Filter.Eq(
                 x => x.TrackingNumber,
                 createDto.TrackingNumber);
@@ -81,7 +78,7 @@ namespace DatabaseMastery.TransportMongoDb.Services.ShipmentTrackingServices
                 return new List<ResultShipmentTrackingDto>();
             }
 
-            return _mapper.Map<List<ResultShipmentTrackingDto>>(shipment.Trackings);
+            return ShipmentTrackingMapper.ToResultList(shipment.Trackings)!;
         }
 
         public async Task<ResultShipmentTrackingDto?> GetTrackingByIndexAsync(
@@ -100,7 +97,7 @@ namespace DatabaseMastery.TransportMongoDb.Services.ShipmentTrackingServices
                 return null;
             }
 
-            return _mapper.Map<ResultShipmentTrackingDto>(shipment.Trackings[index]);
+            return ShipmentTrackingMapper.ToResult(shipment.Trackings[index]);
         }
 
         public async Task UpdateTrackingAsync(UpdateShipmentTrackingDto updateDto)
