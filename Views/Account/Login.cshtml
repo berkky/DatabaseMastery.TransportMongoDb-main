@@ -1,0 +1,56 @@
+@model DatabaseMastery.TransportMongoDb.ViewModels.AdminLoginViewModel
+@{
+    Layout = null;
+    ViewData["Title"] = "Admin Girişi";
+    var returnUrl = ViewData["ReturnUrl"] as string;
+}
+
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>@ViewData["Title"]</title>
+    <link rel="stylesheet" href="~/css/admin-auth.css" asp-append-version="true" />
+</head>
+<body class="auth-body">
+    <main class="auth-shell">
+        <section class="auth-panel" aria-labelledby="login-heading">
+            <p class="auth-brand">Transport Admin</p>
+            <h1 id="login-heading" class="auth-title">Yönetim girişi</h1>
+            <p class="auth-lead">Yetkili hesabınızla oturum açın.</p>
+
+            <form asp-controller="Account"
+                  asp-action="Login"
+                  method="post"
+                  class="auth-form"
+                  novalidate>
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="returnUrl" value="@returnUrl" />
+
+                <div asp-validation-summary="ModelOnly" class="auth-alert" role="alert"></div>
+
+                <div class="auth-field">
+                    <label asp-for="Username"></label>
+                    <input asp-for="Username"
+                           autocomplete="username"
+                           autofocus
+                           class="auth-input" />
+                    <span asp-validation-for="Username" class="auth-field-error"></span>
+                </div>
+
+                <div class="auth-field">
+                    <label asp-for="Password"></label>
+                    <input asp-for="Password"
+                           autocomplete="current-password"
+                           class="auth-input" />
+                    <span asp-validation-for="Password" class="auth-field-error"></span>
+                </div>
+
+                <button type="submit" class="auth-submit">Giriş yap</button>
+            </form>
+        </section>
+    </main>
+</body>
+</html>

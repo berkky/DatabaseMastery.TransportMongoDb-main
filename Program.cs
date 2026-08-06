@@ -44,6 +44,30 @@ builder.Services.AddSingleton<IPasswordHasher<AdminUser>, PasswordHasher<AdminUs
 builder.Services.AddSingleton<IAdminCredentialService, AdminCredentialService>();
 builder.Services.AddHostedService<AdminBootstrapHostedService>();
 
+const string transportAdminScheme = "TransportAdmin";
+
+builder.Services
+    .AddAuthentication(options =>
+    {
+        options.DefaultAuthenticateScheme = transportAdminScheme;
+        options.DefaultChallengeScheme = transportAdminScheme;
+        options.DefaultSignInScheme = transportAdminScheme;
+    })
+    .AddCookie(transportAdminScheme, options =>
+    {
+        options.Cookie.Name = ".TransportAdmin.Auth";
+        options.LoginPath = "/Account/Login";
+        options.AccessDeniedPath = "/Account/AccessDenied";
+        options.Cookie.HttpOnly = true;
+        options.Cookie.SameSite = SameSiteMode.Lax;
+        options.ExpireTimeSpan = TimeSpan.FromHours(8);
+        options.SlidingExpiration = true;
+        options.Cookie.SecurePolicy = builder.Environment.IsDevelopment()
+            ? CookieSecurePolicy.SameAsRequest
+            : CookieSecurePolicy.Always;
+    });
+
+builder.Services.AddAuthorization();
 builder.Services.AddControllersWithViews();
 
 var app = builder.Build();
@@ -59,6 +83,7 @@ if (!app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseRouting();
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapStaticAssets();

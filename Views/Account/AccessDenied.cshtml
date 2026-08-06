@@ -1,0 +1,30 @@
+@{
+    Layout = null;
+    ViewData["Title"] = "Erişim reddedildi";
+}
+
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>@ViewData["Title"]</title>
+    <link rel="stylesheet" href="~/css/admin-auth.css" asp-append-version="true" />
+</head>
+<body class="auth-body">
+    <main class="auth-shell">
+        <section class="auth-panel" aria-labelledby="denied-heading">
+            <p class="auth-brand">Transport Admin</p>
+            <h1 id="denied-heading" class="auth-title">Erişim reddedildi</h1>
+            <p class="auth-lead">
+                Bu sayfayı görüntülemek için gerekli yetkiye sahip değilsiniz.
+                Farklı bir hesapla giriş yapmayı deneyebilirsiniz.
+            </p>
+            <p class="auth-actions">
+                <a class="auth-link" asp-controller="Account" asp-action="Login">Giriş sayfasına dön</a>
+            </p>
+        </section>
+    </main>
+</body>
+</html>
