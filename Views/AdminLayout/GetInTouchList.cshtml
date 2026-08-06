@@ -99,13 +99,19 @@
                                                    class="btn btn-sm btn-primary">
                                                     Güncelle
                                                 </a>
-                                                <a asp-controller="GetInTouch"
-                                                   asp-action="DeleteGetInTouch"
-                                                   asp-route-id="@item.GetInTouchSectionId"
-                                                   class="btn btn-sm btn-danger"
-                                                   onclick="return confirm('Bu iletişim alanını silmek istediğinizden emin misiniz?')">
-                                                    Sil
-                                                </a>
+                                                <form asp-controller="GetInTouch"
+                                                      asp-action="DeleteGetInTouch"
+                                                      method="post"
+                                                      class="d-inline"
+                                                      onsubmit="return confirm('Bu kaydı silmek istediğinize emin misiniz?');">
+                                                    @Html.AntiForgeryToken()
+                                                    <input type="hidden" name="id" value="@item.GetInTouchSectionId" />
+                                                    <button type="submit"
+                                                            class="btn btn-sm btn-danger"
+                                                            aria-label="İletişim alanı kaydını sil">
+                                                        Sil
+                                                    </button>
+                                                </form>
                                             </td>
                                         </tr>
                                     }

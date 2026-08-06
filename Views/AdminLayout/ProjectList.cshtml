@@ -92,13 +92,19 @@
                                                    class="btn btn-sm btn-primary">
                                                     Güncelle
                                                 </a>
-                                                <a asp-controller="Project"
-                                                   asp-action="DeleteProject"
-                                                   asp-route-id="@item.ProjectId"
-                                                   class="btn btn-sm btn-danger"
-                                                   onclick="return confirm('Bu projeyi silmek istediğinizden emin misiniz?')">
-                                                    Sil
-                                                </a>
+                                                <form asp-controller="Project"
+                                                      asp-action="DeleteProject"
+                                                      method="post"
+                                                      class="d-inline"
+                                                      onsubmit="return confirm('Bu kaydı silmek istediğinize emin misiniz?');">
+                                                    @Html.AntiForgeryToken()
+                                                    <input type="hidden" name="id" value="@item.ProjectId" />
+                                                    <button type="submit"
+                                                            class="btn btn-sm btn-danger"
+                                                            aria-label="Proje kaydını sil">
+                                                        Sil
+                                                    </button>
+                                                </form>
                                             </td>
                                         </tr>
                                     }

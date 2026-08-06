@@ -43,13 +43,19 @@
                                                    class="btn btn-sm btn-primary">
                                                     Güncelle
                                                 </a>
-                                                <a asp-controller="HowItWorks"
-                                                   asp-action="DeleteHowItWorks"
-                                                   asp-route-id="@item.HowItWorksId"
-                                                   class="btn btn-sm btn-danger"
-                                                   onclick="return confirm('Bu çalışma adımını silmek istediğinizden emin misiniz?')">
-                                                    Sil
-                                                </a>
+                                                <form asp-controller="HowItWorks"
+                                                      asp-action="DeleteHowItWorks"
+                                                      method="post"
+                                                      class="d-inline"
+                                                      onsubmit="return confirm('Bu kaydı silmek istediğinize emin misiniz?');">
+                                                    @Html.AntiForgeryToken()
+                                                    <input type="hidden" name="id" value="@item.HowItWorksId" />
+                                                    <button type="submit"
+                                                            class="btn btn-sm btn-danger"
+                                                            aria-label="Çalışma adımı kaydını sil">
+                                                        Sil
+                                                    </button>
+                                                </form>
                                             </td>
                                         </tr>
                                     }

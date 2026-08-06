@@ -38,6 +38,8 @@ namespace DatabaseMastery.TransportMongoDb.Controllers
             return RedirectToAction(nameof(ProjectList));
         }
 
+        [HttpPost]
+        [ValidateAntiForgeryToken]
         [Authorize(Roles = AdminRoles.AdminsOnly)]
         public async Task<IActionResult> DeleteProject(string id)
         {

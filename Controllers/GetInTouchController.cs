@@ -37,6 +37,8 @@ namespace DatabaseMastery.TransportMongoDb.Controllers
             return RedirectToAction(nameof(GetInTouchlist));
         }
 
+        [HttpPost]
+        [ValidateAntiForgeryToken]
         [Authorize(Roles = AdminRoles.AdminsOnly)]
         public async Task<IActionResult> DeleteGetInTouch(string id)
         {

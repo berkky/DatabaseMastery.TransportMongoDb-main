@@ -38,6 +38,8 @@ namespace DatabaseMastery.TransportMongoDb.Controllers
             return RedirectToAction(nameof(TestimonialList));
         }
 
+        [HttpPost]
+        [ValidateAntiForgeryToken]
         [Authorize(Roles = AdminRoles.AdminsOnly)]
         public async Task<IActionResult> DeleteTestimonial(string id)
         {

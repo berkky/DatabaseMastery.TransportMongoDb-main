@@ -98,13 +98,19 @@
                                                    class="btn btn-sm btn-primary">
                                                     Güncelle
                                                 </a>
-                                                <a asp-controller="Testimonial"
-                                                   asp-action="DeleteTestimonial"
-                                                   asp-route-id="@item.TestimonialId"
-                                                   class="btn btn-sm btn-danger"
-                                                   onclick="return confirm('Bu müşteri yorumunu silmek istediğinizden emin misiniz?')">
-                                                    Sil
-                                                </a>
+                                                <form asp-controller="Testimonial"
+                                                      asp-action="DeleteTestimonial"
+                                                      method="post"
+                                                      class="d-inline"
+                                                      onsubmit="return confirm('Bu kaydı silmek istediğinize emin misiniz?');">
+                                                    @Html.AntiForgeryToken()
+                                                    <input type="hidden" name="id" value="@item.TestimonialId" />
+                                                    <button type="submit"
+                                                            class="btn btn-sm btn-danger"
+                                                            aria-label="Müşteri yorumu kaydını sil">
+                                                        Sil
+                                                    </button>
+                                                </form>
                                             </td>
                                         </tr>
                                     }

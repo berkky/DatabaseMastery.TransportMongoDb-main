@@ -38,6 +38,8 @@ namespace DatabaseMastery.TransportMongoDb.Controllers
             return RedirectToAction(nameof(HowItWorkslist));
         }
 
+        [HttpPost]
+        [ValidateAntiForgeryToken]
         [Authorize(Roles = AdminRoles.AdminsOnly)]
         public async Task<IActionResult> DeleteHowItWorks(string id)
         {
