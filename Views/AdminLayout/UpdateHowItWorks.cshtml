@@ -1,4 +1,4 @@
-@model GetHowItWorksByIdDto
+@model UpdateHowItWorksDto
 
 @{
     ViewData["Title"] = "How It Works Güncelle";
@@ -14,7 +14,10 @@
                         <h4 class="card-title mb-0">How It Works Güncelle</h4>
                     </div>
                     <div class="card-body">
-                        <form asp-controller="HowItWorks" asp-action="UpdateHowItWorks" method="post">
+                        <form asp-controller="HowItWorks"
+                              asp-action="UpdateHowItWorks"
+                              asp-route-id="@Model.HowItWorksId"
+                              method="post">
                             <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
                             <input asp-for="HowItWorksId" type="hidden" />
 
