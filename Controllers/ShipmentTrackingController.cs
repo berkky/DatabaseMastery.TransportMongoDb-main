@@ -34,6 +34,11 @@ namespace DatabaseMastery.TransportMongoDb.Controllers
         [Authorize(Roles = AdminRoles.OperatorsAndAbove)]
         public async Task<IActionResult> AddTracking(string trackingNumber)
         {
+            if (string.IsNullOrWhiteSpace(trackingNumber))
+            {
+                return BadRequest();
+            }
+
             if (!await PopulateShipmentSummaryAsync(trackingNumber))
             {
                 return NotFound();
@@ -47,10 +52,18 @@ namespace DatabaseMastery.TransportMongoDb.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         [Authorize(Roles = AdminRoles.OperatorsAndAbove)]
         public async Task<IActionResult> AddTracking(
             CreateShipmentTrackingDto createDto)
         {
+            if (createDto.EventDate == default)
+            {
+                ModelState.AddModelError(
+                    nameof(createDto.EventDate),
+                    "Hareket tarihi gereklidir.");
+            }
+
             if (!ModelState.IsValid)
             {
                 if (!await PopulateShipmentSummaryAsync(createDto.TrackingNumber))
@@ -76,6 +89,11 @@ namespace DatabaseMastery.TransportMongoDb.Controllers
         public async Task<IActionResult> UpdateTracking(
             string trackingNumber, int index)
         {
+            if (string.IsNullOrWhiteSpace(trackingNumber) || index < 0)
+            {
+                return BadRequest();
+            }
+
             var tracking = await _trackingService
                 .GetTrackingByIndexAsync(trackingNumber, index);
 
@@ -103,10 +121,18 @@ namespace DatabaseMastery.TransportMongoDb.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         [Authorize(Roles = AdminRoles.OperatorsAndAbove)]
         public async Task<IActionResult> UpdateTracking(
             UpdateShipmentTrackingDto updateDto)
         {
+            if (updateDto.EventDate == default)
+            {
+                ModelState.AddModelError(
+                    nameof(updateDto.EventDate),
+                    "Hareket tarihi gereklidir.");
+            }
+
             if (!ModelState.IsValid)
             {
                 if (!await PopulateShipmentSummaryAsync(updateDto.TrackingNumber))

@@ -104,6 +104,7 @@
                     <form asp-controller="ShipmentTracking"
                           asp-action="AddTracking"
                           method="post">
+                        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
                         <input type="hidden" asp-for="TrackingNumber" />
 
                         <div class="row g-4" aria-label="Kargo hareketi bilgileri">
