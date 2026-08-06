@@ -1,0 +1,115 @@
+﻿@model List<ResultBrandDto>
+@inject Microsoft.AspNetCore.Hosting.IWebHostEnvironment WebHostEnvironment
+@using System.IO
+
+@functions {
+    private string GetLocalBrandImage(string imageUrl, int index)
+    {
+        var fallbackImages = new[]
+        {
+            "/templates/assets/imgs/slider/logo/alea.png",
+            "/templates/assets/imgs/slider/logo/land.png",
+            "/templates/assets/imgs/slider/logo/logis.png",
+            "/templates/assets/imgs/slider/logo/truck.png",
+            "/templates/assets/imgs/slider/logo/saltos.png",
+            "/templates/assets/imgs/slider/logo/creati.png"
+        };
+
+        if (!string.IsNullOrWhiteSpace(imageUrl))
+        {
+            var normalizedUrl = imageUrl.Trim().Replace('\\', '/');
+            if (normalizedUrl.StartsWith("~/"))
+            {
+                normalizedUrl = normalizedUrl[1..];
+            }
+            if (normalizedUrl.StartsWith("/wwwroot/", StringComparison.OrdinalIgnoreCase))
+            {
+                normalizedUrl = normalizedUrl["/wwwroot".Length..];
+            }
+            if (!normalizedUrl.StartsWith('/'))
+            {
+                normalizedUrl = "/" + normalizedUrl;
+            }
+
+            if (!normalizedUrl.Contains(':', StringComparison.Ordinal))
+            {
+                var relativePath = normalizedUrl.TrimStart('/').Replace('/', System.IO.Path.DirectorySeparatorChar);
+                var webRootPath = System.IO.Path.GetFullPath(WebHostEnvironment.WebRootPath)
+                    .TrimEnd(System.IO.Path.DirectorySeparatorChar) + System.IO.Path.DirectorySeparatorChar;
+                var physicalPath = System.IO.Path.GetFullPath(System.IO.Path.Combine(webRootPath, relativePath));
+
+                if (physicalPath.StartsWith(webRootPath, StringComparison.OrdinalIgnoreCase) &&
+                    File.Exists(physicalPath))
+                {
+                    return normalizedUrl;
+                }
+            }
+        }
+
+        return fallbackImages[index % fallbackImages.Length];
+    }
+}
+
+<div class="section bg-2 trusted-brand-section pt-65 pb-35">
+    <div class="container">
+        <div class="row align-items-center trusted-brand-row">
+            <div class="col-lg-3 mb-30 text-center text-lg-start">
+                <p class="font-2xl-bold color-brand-2 trusted-brand-title">
+                    We are <span class="color-brand-1">trusted</span><br>
+                    Bize Güvenen Markalar
+                </p>
+            </div>
+            <div class="col-lg-9 mb-30">
+                <div class="box-swiper">
+                    <div class="swiper-container swiper-trusted-gallery pb-0">
+                        <div class="swiper-wrapper">
+                            <div class="swiper-slide"><img src="/templates/assets/imgs/page/homepage1/menu1.png" alt="Deniz taşımacılığı" loading="lazy"></div>
+                            <div class="swiper-slide"><img src="/templates/assets/imgs/page/homepage1/menu2.png" alt="Hava taşımacılığı" loading="lazy"></div>
+                            <div class="swiper-slide"><img src="/templates/assets/imgs/page/homepage1/menu3.png" alt="Kara taşımacılığı" loading="lazy"></div>
+                            <div class="swiper-slide"><img src="/templates/assets/imgs/page/homepage1/menu4.png" alt="Demiryolu taşımacılığı" loading="lazy"></div>
+                            <div class="swiper-slide"><img src="/templates/assets/imgs/page/homepage1/menu5.png" alt="Depolama hizmetleri" loading="lazy"></div>
+                            <div class="swiper-slide"><img src="/templates/assets/imgs/page/homepage1/menu1.png" alt="Deniz taşımacılığı" loading="lazy"></div>
+                            <div class="swiper-slide"><img src="/templates/assets/imgs/page/homepage1/menu2.png" alt="Hava taşımacılığı" loading="lazy"></div>
+                            <div class="swiper-slide"><img src="/templates/assets/imgs/page/homepage1/menu3.png" alt="Kara taşımacılığı" loading="lazy"></div>
+                            <div class="swiper-slide"><img src="/templates/assets/imgs/page/homepage1/menu4.png" alt="Demiryolu taşımacılığı" loading="lazy"></div>
+                            <div class="swiper-slide"><img src="/templates/assets/imgs/page/homepage1/menu5.png" alt="Depolama hizmetleri" loading="lazy"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="trusted-brand-logos">
+            <div class="box-swiper">
+                <div class="swiper-container swiper-brand-logos pb-0">
+                    <div class="swiper-wrapper">
+                        @if (Model != null && Model.Count > 0)
+                        {
+                            var slideCount = Math.Max(12, Model.Count);
+                            for (var index = 0; index < slideCount; index++)
+                            {
+                                var item = Model[index % Model.Count];
+                                <div class="swiper-slide">
+                                    <img src="@GetLocalBrandImage(item.ImageUrl, index)"
+                                         alt="@item.BrandName"
+                                         loading="lazy">
+                                </div>
+                            }
+                        }
+                        else
+                        {
+                            var themeLogos = new[] { "alea", "land", "logis", "truck", "saltos", "creati" };
+                            for (var index = 0; index < 12; index++)
+                            {
+                                var logo = themeLogos[index % themeLogos.Length];
+                                <div class="swiper-slide">
+                                    <img src="/templates/assets/imgs/slider/logo/@(logo).png" alt="@logo marka logosu" loading="lazy">
+                                </div>
+                            }
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

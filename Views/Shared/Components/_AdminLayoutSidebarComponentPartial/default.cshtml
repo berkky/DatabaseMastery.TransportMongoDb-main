@@ -1,0 +1,112 @@
+﻿@{
+    var currentController = ViewContext.RouteData.Values["controller"]?.ToString() ?? string.Empty;
+
+    bool MenuActive(string controller) =>
+        string.Equals(currentController, controller, StringComparison.OrdinalIgnoreCase) ||
+        (string.Equals(controller, "Shipment", StringComparison.OrdinalIgnoreCase) &&
+         string.Equals(currentController, "ShipmentTracking", StringComparison.OrdinalIgnoreCase));
+
+    string MenuItemClass(string controller) => MenuActive(controller) ? "menuitem-active" : string.Empty;
+    string LinkClass(string controller) => MenuActive(controller) ? "tp-link active" : "tp-link";
+}
+
+<div class="app-sidebar-menu">
+    <div class="h-100" data-simplebar>
+
+        <!--- Sidemenu -->
+        <div id="sidebar-menu">
+
+            <div class="logo-box">
+                <a asp-controller="AdminLayout" asp-action="Index" class="logo logo-light">
+                    <span class="logo-sm">
+                        <img src="/Silva-Admin/dist/assets/images/logo-sm.png" alt="" height="22">
+                    </span>
+                    <span class="logo-lg">
+                        <img src="/Silva-Admin/dist/assets/images/logo-light.png" alt="" height="24">
+                    </span>
+                </a>
+                <a asp-controller="AdminLayout" asp-action="Index" class="logo logo-dark">
+                    <span class="logo-sm">
+                        <img src="/Silva-Admin/dist/assets/images/logo-sm.png" alt="" height="22">
+                    </span>
+                    <span class="logo-lg">
+                        <img src="/Silva-Admin/dist/assets/images/logo-dark.png" alt="" height="24">
+                    </span>
+                </a>
+            </div>
+
+            <ul id="side-menu">
+
+                <li class="menu-title">Menü</li>
+
+            
+                <li class="menu-title mt-2">Ana Sayfa Alanları</li>
+
+                <li class="@MenuItemClass("Slider")">
+                    <a asp-controller="Slider" asp-action="Sliderlist" class="@LinkClass("Slider")">
+                        <i data-feather="columns" aria-hidden="true"></i>
+                        <span> Slider Listesi </span>
+                    </a>
+                </li>
+                <li class="@MenuItemClass("Brand")">
+                    <a asp-controller="Brand" asp-action="Brandlist" class="@LinkClass("Brand")">
+                        <i data-feather="tag" aria-hidden="true"></i>
+                        <span> Marka Listesi </span>
+                    </a>
+                </li>
+                <li class="@MenuItemClass("Offer")">
+                    <a asp-controller="Offer" asp-action="Offerlist" class="@LinkClass("Offer")">
+                        <i data-feather="tool" aria-hidden="true"></i>
+                        <span> Hizmet Listesi </span>
+                    </a>
+                </li>
+                <li class="@MenuItemClass("About")">
+                    <a asp-controller="About" asp-action="Aboutlist" class="@LinkClass("About")">
+                        <i data-feather="info" aria-hidden="true"></i>
+                        <span> Hakkımızda İşlemleri </span>
+                    </a>
+                </li>
+                <li class="@MenuItemClass("HowItWorks")">
+                    <a asp-controller="HowItWorks" asp-action="HowItWorkslist" class="@LinkClass("HowItWorks")">
+                        <i data-feather="git-branch" aria-hidden="true"></i>
+                        <span> Nasıl Çalışır İşlemleri </span>
+                    </a>
+                </li>
+                <li class="@MenuItemClass("GetInTouch")">
+                    <a asp-controller="GetInTouch" asp-action="GetInTouchlist" class="@LinkClass("GetInTouch")">
+                        <i data-feather="phone-call" aria-hidden="true"></i>
+                        <span> İletişim Alanı İşlemleri </span>
+                    </a>
+                </li>
+                <li class="@MenuItemClass("Testimonial")">
+                    <a asp-controller="Testimonial" asp-action="TestimonialList" class="@LinkClass("Testimonial")">
+                        <i data-feather="message-square" aria-hidden="true"></i>
+                        <span> Müşteri Yorumları </span>
+                    </a>
+                </li>
+                <li class="@MenuItemClass("Project")">
+                    <a asp-controller="Project" asp-action="ProjectList" class="@LinkClass("Project")">
+                        <i data-feather="folder" aria-hidden="true"></i>
+                        <span> Proje İşlemleri </span>
+                    </a>
+                </li>
+
+                <li class="menu-title mt-2">General</li>
+
+                <li class="@MenuItemClass("Shipment")">
+                    <a asp-controller="Shipment" asp-action="ShipmentList" class="@LinkClass("Shipment")">
+                        <i data-feather="truck" aria-hidden="true"></i>
+                        <span> Gönderi İşlemleri </span>
+                    </a>
+                </li>
+
+
+            </ul>
+
+        </div>
+        <!-- End Sidebar -->
+
+        <div class="clearfix"></div>
+
+    </div>
+</div>

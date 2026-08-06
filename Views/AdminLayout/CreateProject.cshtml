@@ -1,0 +1,75 @@
+@model CreateProjectDto
+
+@{
+    ViewData["Title"] = "Proje Ekle";
+    Layout = "~/Views/AdminLayout/Index.cshtml";
+}
+
+<div class="page-content">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h4 class="card-title mb-0">Proje Ekle</h4>
+                    </div>
+                    <div class="card-body">
+                        <form asp-controller="Project"
+                              asp-action="CreateProject"
+                              method="post">
+                            <div asp-validation-summary="ModelOnly"
+                                 class="text-danger mb-3"></div>
+
+                            <div class="mb-3">
+                                <label asp-for="Title" class="form-label">
+                                    Başlık
+                                </label>
+                                <input asp-for="Title" class="form-control" />
+                                <span asp-validation-for="Title"
+                                      class="text-danger"></span>
+                            </div>
+
+                            <div class="mb-3">
+                                <label asp-for="Description" class="form-label">
+                                    Açıklama
+                                </label>
+                                <textarea asp-for="Description"
+                                          class="form-control"
+                                          rows="5"></textarea>
+                                <span asp-validation-for="Description"
+                                      class="text-danger"></span>
+                            </div>
+
+                            <div class="mb-3">
+                                <label asp-for="ImageUrl" class="form-label">
+                                    Görsel Web Yolu
+                                </label>
+                                <input asp-for="ImageUrl"
+                                       class="form-control"
+                                       placeholder="/templates/assets/imgs/page/homepage1/img.png" />
+                                <span asp-validation-for="ImageUrl"
+                                      class="text-danger"></span>
+                            </div>
+
+                            <div class="form-check mb-3">
+                                <input asp-for="Status" class="form-check-input" />
+                                <label asp-for="Status" class="form-check-label">
+                                    Ana sayfada göster
+                                </label>
+                            </div>
+
+                            <button type="submit" class="btn btn-success">
+                                Kaydet
+                            </button>
+                            <a asp-controller="Project"
+                               asp-action="ProjectList"
+                               class="btn btn-secondary">
+                                İptal
+                            </a>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,63 @@
+/* Admin sidebar — scoped under .app-sidebar-menu only */
+.app-sidebar-menu #sidebar-menu > ul > li:not(.menu-title) {
+    margin-bottom: 2px;
+}
+
+.app-sidebar-menu #sidebar-menu > ul > li:not(.menu-title) > a.tp-link {
+    display: flex;
+    align-items: center;
+    min-height: 40px;
+    padding: 10px 16px;
+    border-radius: 0.475rem;
+    border-left: 3px solid transparent;
+    transition: color 0.2s ease, background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.app-sidebar-menu #sidebar-menu > ul > li:not(.menu-title) > a.tp-link > i,
+.app-sidebar-menu #sidebar-menu > ul > li:not(.menu-title) > a.tp-link > svg {
+    flex-shrink: 0;
+    width: 18px;
+    height: 18px;
+    margin: 0 10px 0 0;
+    vertical-align: middle;
+}
+
+.app-sidebar-menu #sidebar-menu > ul > li:not(.menu-title) > a.tp-link > svg {
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.app-sidebar-menu #sidebar-menu > ul > li:not(.menu-title) > a.tp-link > span {
+    flex: 1;
+    line-height: 1.25;
+    vertical-align: middle;
+}
+
+.app-sidebar-menu #sidebar-menu > ul > li:not(.menu-title) > a.tp-link:hover,
+.app-sidebar-menu #sidebar-menu > ul > li:not(.menu-title) > a.tp-link:focus-visible {
+    color: #287F71;
+    background-color: rgba(40, 127, 113, 0.06);
+    text-decoration: none;
+}
+
+.app-sidebar-menu #sidebar-menu > ul > li:not(.menu-title) > a.tp-link:focus-visible {
+    outline: 2px solid rgba(40, 127, 113, 0.35);
+    outline-offset: 1px;
+}
+
+.app-sidebar-menu #sidebar-menu > ul > li.menuitem-active > a.tp-link.active,
+.app-sidebar-menu #sidebar-menu > ul > li:not(.menu-title) > a.tp-link.active {
+    color: #287F71;
+    background-color: rgba(40, 127, 113, 0.1);
+    border-left-color: #287F71;
+}
+
+.app-sidebar-menu #sidebar-menu .menu-title {
+    padding: 10px 16px 6px;
+    margin-bottom: 2px;
+    pointer-events: none;
+    user-select: none;
+}

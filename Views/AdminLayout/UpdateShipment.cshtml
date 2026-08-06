@@ -1,0 +1,168 @@
+@model GetShipmentByIdDto
+
+@{
+    ViewData["Title"] = "Gönderi Güncelle";
+    Layout = "~/Views/AdminLayout/Index.cshtml";
+}
+
+<div class="page-content">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-12">
+                <div class="card shadow-sm">
+                    <div class="card-header d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2">
+                        <div>
+                            <h4 class="card-title mb-1">Gönderiyi Güncelle</h4>
+                            <p class="text-muted mb-0">Mevcut gönderi ve teslimat bilgilerini düzenleyin.</p>
+                        </div>
+                        <span class="badge bg-primary">Düzenleme</span>
+                    </div>
+                    <div class="card-body">
+                        <form asp-controller="Shipment"
+                              asp-action="UpdateShipment"
+                              method="post">
+                            <div asp-validation-summary="ModelOnly"
+                                 class="text-danger mb-3"></div>
+                            <input asp-for="ShipmentId" type="hidden" />
+
+                            <div class="row g-4">
+                                <div class="col-12">
+                                    <div class="border rounded p-3">
+                                        <h5 class="h6 mb-1">Gönderici Bilgileri</h5>
+                                        <p class="text-muted small mb-3">Gönderiyi teslim eden kişinin iletişim bilgileri.</p>
+
+                                        <div class="row g-3">
+                                            <div class="col-md-6">
+                                                <label asp-for="SenderName" class="form-label">Gönderici Adı</label>
+                                                <input asp-for="SenderName" class="form-control" placeholder="Gönderici adını girin" />
+                                                <span asp-validation-for="SenderName" class="text-danger"></span>
+                                            </div>
+
+                                            <div class="col-md-6">
+                                                <label asp-for="SenderPhone" class="form-label">Gönderici Telefonu</label>
+                                                <input asp-for="SenderPhone" class="form-control" type="tel" placeholder="Telefon numarasını girin" />
+                                                <span asp-validation-for="SenderPhone" class="text-danger"></span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-12">
+                                    <div class="border rounded p-3">
+                                        <h5 class="h6 mb-1">Alıcı Bilgileri</h5>
+                                        <p class="text-muted small mb-3">Teslimatı alacak kişinin iletişim bilgileri.</p>
+
+                                        <div class="row g-3">
+                                            <div class="col-md-6">
+                                                <label asp-for="ReceiverName" class="form-label">Alıcı Adı</label>
+                                                <input asp-for="ReceiverName" class="form-control" placeholder="Alıcı adını girin" />
+                                                <span asp-validation-for="ReceiverName" class="text-danger"></span>
+                                            </div>
+
+                                            <div class="col-md-6">
+                                                <label asp-for="ReceiverPhone" class="form-label">Alıcı Telefonu</label>
+                                                <input asp-for="ReceiverPhone" class="form-control" type="tel" placeholder="Telefon numarasını girin" />
+                                                <span asp-validation-for="ReceiverPhone" class="text-danger"></span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-12">
+                                    <div class="border rounded p-3">
+                                        <h5 class="h6 mb-1">Güzergâh Bilgileri</h5>
+                                        <p class="text-muted small mb-3">Gönderinin çıkış ve varış noktalarını düzenleyin.</p>
+
+                                        <div class="row g-3">
+                                            <div class="col-lg-6">
+                                                <div class="bg-light rounded p-3 h-100">
+                                                    <p class="text-muted small text-uppercase mb-3">Çıkış Noktası</p>
+                                                    <div class="row g-3">
+                                                        <div class="col-md-6">
+                                                            <label asp-for="DepartureCity" class="form-label">Çıkış İli</label>
+                                                            <input asp-for="DepartureCity" class="form-control" placeholder="İl" />
+                                                            <span asp-validation-for="DepartureCity" class="text-danger"></span>
+                                                        </div>
+
+                                                        <div class="col-md-6">
+                                                            <label asp-for="DepartureDistrict" class="form-label">Çıkış İlçesi</label>
+                                                            <input asp-for="DepartureDistrict" class="form-control" placeholder="İlçe" />
+                                                            <span asp-validation-for="DepartureDistrict" class="text-danger"></span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="col-lg-6">
+                                                <div class="bg-light rounded p-3 h-100">
+                                                    <p class="text-muted small text-uppercase mb-3">Varış Noktası</p>
+                                                    <div class="row g-3">
+                                                        <div class="col-md-6">
+                                                            <label asp-for="ArrivalCity" class="form-label">Varış İli</label>
+                                                            <input asp-for="ArrivalCity" class="form-control" placeholder="İl" />
+                                                            <span asp-validation-for="ArrivalCity" class="text-danger"></span>
+                                                        </div>
+
+                                                        <div class="col-md-6">
+                                                            <label asp-for="ArrivalDistrict" class="form-label">Varış İlçesi</label>
+                                                            <input asp-for="ArrivalDistrict" class="form-control" placeholder="İlçe" />
+                                                            <span asp-validation-for="ArrivalDistrict" class="text-danger"></span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-12">
+                                    <div class="border rounded p-3">
+                                        <h5 class="h6 mb-1">Gönderi Detayları</h5>
+                                        <p class="text-muted small mb-3">Takip, tarih, durum ve teslimat adresini güncelleyin.</p>
+
+                                        <div class="row g-3">
+                                            <div class="col-md-6">
+                                                <label asp-for="TrackingNumber" class="form-label">Takip Numarası</label>
+                                                <input asp-for="TrackingNumber" class="form-control" placeholder="Takip numarasını girin" />
+                                                <span asp-validation-for="TrackingNumber" class="text-danger"></span>
+                                            </div>
+
+                                            <div class="col-md-6">
+                                                <label asp-for="CreatedDate" class="form-label">Oluşturma Tarihi</label>
+                                                <input asp-for="CreatedDate" class="form-control" type="datetime-local" />
+                                                <span asp-validation-for="CreatedDate" class="text-danger"></span>
+                                            </div>
+
+                                            <div class="col-md-6">
+                                                <label asp-for="CurrentStatus" class="form-label">Güncel Durum</label>
+                                                <input asp-for="CurrentStatus" class="form-control" placeholder="Gönderi durumunu girin" />
+                                                <span asp-validation-for="CurrentStatus" class="text-danger"></span>
+                                            </div>
+
+                                            <div class="col-12">
+                                                <label asp-for="Address" class="form-label">Açık Adres</label>
+                                                <textarea asp-for="Address" class="form-control" rows="4" placeholder="Teslimat adresini girin"></textarea>
+                                                <span asp-validation-for="Address" class="text-danger"></span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="d-flex flex-column flex-sm-row justify-content-end gap-2 mt-4 pt-3 border-top">
+                                <a asp-controller="Shipment"
+                                   asp-action="ShipmentList"
+                                   class="btn btn-secondary">
+                                    Listeye Dön
+                                </a>
+                                <button type="submit" class="btn btn-success">
+                                    Gönderiyi Güncelle
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

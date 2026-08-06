@@ -1,0 +1,852 @@
+﻿@model List<ResultSliderDto>
+
+@{
+    ViewData["Title"] = "SliderList";
+    Layout = "~/Views/AdminLayout/Index.cshtml";
+}
+
+
+
+<style>
+    @@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&family=Space+Mono:wght@400;700&display=swap');
+
+    :root {
+        --primary: #2D3250;
+        --primary-light: #424769;
+        --accent: #F6B17A;
+        --accent-hover: #E89A5C;
+        --success: #10B981;
+        --danger: #EF4444;
+        --warning: #F59E0B;
+        --bg: #F8F9FA;
+        --card-bg: #FFFFFF;
+        --text: #2D3250;
+        --text-muted: #7B8794;
+        --border: #E8ECF1;
+        --shadow-sm: 0 2px 8px rgba(45, 50, 80, 0.04);
+        --shadow-md: 0 8px 24px rgba(45, 50, 80, 0.08);
+        --shadow-lg: 0 16px 48px rgba(45, 50, 80, 0.12);
+    }
+
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    body {
+        font-family: 'Outfit', sans-serif;
+        background: var(--bg);
+        color: var(--text);
+    }
+
+    .slider-list-container {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 40px 24px;
+        animation: fadeIn 0.6s ease-out;
+    }
+
+    @@keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* Header Section */
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 32px;
+        gap: 24px;
+    }
+
+    .header-content {
+        flex: 1;
+        position: relative;
+    }
+
+        .header-content::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 4px;
+            height: 100%;
+            background: linear-gradient(180deg, var(--accent), var(--accent-hover));
+            border-radius: 2px;
+        }
+
+    .header-text {
+        padding-left: 24px;
+    }
+
+    .page-title {
+        font-size: 32px;
+        font-weight: 700;
+        color: var(--primary);
+        margin-bottom: 8px;
+        letter-spacing: -0.5px;
+    }
+
+    .page-subtitle {
+        font-size: 16px;
+        color: var(--text-muted);
+        font-weight: 300;
+    }
+
+    .header-actions {
+        display: flex;
+        gap: 12px;
+        align-items: center;
+    }
+
+    .btn {
+        padding: 14px 24px;
+        font-size: 14px;
+        font-weight: 600;
+        border-radius: 12px;
+        border: none;
+        cursor: pointer;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        font-family: 'Outfit', sans-serif;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        text-decoration: none;
+        white-space: nowrap;
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, var(--accent), var(--accent-hover));
+        color: white;
+        box-shadow: var(--shadow-sm);
+    }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+
+    .btn-icon {
+        background: white;
+        color: var(--primary);
+        width: 42px;
+        height: 42px;
+        padding: 0;
+        justify-content: center;
+        border: 2px solid var(--border);
+    }
+
+        .btn-icon:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+    /* Stats Cards */
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 16px;
+        margin-bottom: 32px;
+    }
+
+    .stat-card {
+        background: linear-gradient(135deg, var(--card-bg), #FAFBFC);
+        padding: 20px 24px;
+        border-radius: 12px;
+        border: 1px solid var(--border);
+        box-shadow: var(--shadow-sm);
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        transition: all 0.3s ease;
+        animation: slideUp 0.5s ease-out;
+        animation-fill-mode: both;
+    }
+
+        .stat-card:nth-child(1) {
+            animation-delay: 0.1s;
+        }
+
+        .stat-card:nth-child(2) {
+            animation-delay: 0.15s;
+        }
+
+        .stat-card:nth-child(3) {
+            animation-delay: 0.2s;
+        }
+
+        .stat-card:nth-child(4) {
+            animation-delay: 0.25s;
+        }
+
+    @@keyframes slideUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .stat-card:hover {
+        transform: translateY(-4px);
+        box-shadow: var(--shadow-md);
+    }
+
+    .stat-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+
+        .stat-icon.primary {
+            background: linear-gradient(135deg, var(--accent), var(--accent-hover));
+        }
+
+        .stat-icon.success {
+            background: linear-gradient(135deg, #10B981, #059669);
+        }
+
+        .stat-icon.warning {
+            background: linear-gradient(135deg, #F59E0B, #D97706);
+        }
+
+        .stat-icon.info {
+            background: linear-gradient(135deg, #3B82F6, #2563EB);
+        }
+
+        .stat-icon svg {
+            width: 24px;
+            height: 24px;
+            color: white;
+        }
+
+    .stat-content {
+        flex: 1;
+    }
+
+    .stat-label {
+        font-size: 12px;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        font-family: 'Space Mono', monospace;
+        margin-bottom: 4px;
+    }
+
+    .stat-value {
+        font-size: 24px;
+        font-weight: 700;
+        color: var(--primary);
+    }
+
+    /* Search and Filter Bar */
+    .control-bar {
+        background: var(--card-bg);
+        padding: 20px 24px;
+        border-radius: 12px;
+        border: 1px solid var(--border);
+        box-shadow: var(--shadow-sm);
+        margin-bottom: 24px;
+        display: flex;
+        gap: 16px;
+        align-items: center;
+        flex-wrap: wrap;
+    }
+
+    .search-box {
+        flex: 1;
+        min-width: 250px;
+        position: relative;
+    }
+
+    .search-input {
+        width: 100%;
+        padding: 12px 16px 12px 44px;
+        border: 2px solid var(--border);
+        border-radius: 10px;
+        font-size: 14px;
+        font-family: 'Outfit', sans-serif;
+        background: var(--bg);
+        color: var(--text);
+        transition: all 0.3s ease;
+    }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--accent);
+            background: white;
+            box-shadow: 0 0 0 4px rgba(246, 177, 122, 0.1);
+        }
+
+    .search-icon {
+        position: absolute;
+        left: 14px;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 20px;
+        height: 20px;
+        color: var(--text-muted);
+        pointer-events: none;
+    }
+
+    .filter-group {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+    }
+
+    .filter-btn {
+        padding: 10px 16px;
+        font-size: 13px;
+        font-weight: 500;
+        border-radius: 8px;
+        border: 2px solid var(--border);
+        background: white;
+        color: var(--text);
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-family: 'Outfit', sans-serif;
+    }
+
+        .filter-btn:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        .filter-btn.active {
+            background: linear-gradient(135deg, var(--accent), var(--accent-hover));
+            color: white;
+            border-color: var(--accent);
+        }
+
+    /* Table Card */
+    .table-card {
+        background: var(--card-bg);
+        border-radius: 16px;
+        border: 1px solid var(--border);
+        box-shadow: var(--shadow-md);
+        overflow: hidden;
+        animation: slideUp 0.6s ease-out 0.3s;
+        animation-fill-mode: both;
+    }
+
+    .table-wrapper {
+        overflow-x: auto;
+    }
+
+    .slider-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+        .slider-table thead {
+            background: linear-gradient(135deg, var(--bg), #FAFBFC);
+            border-bottom: 2px solid var(--border);
+        }
+
+        .slider-table th {
+            padding: 18px 24px;
+            text-align: left;
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--primary);
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            font-family: 'Space Mono', monospace;
+            white-space: nowrap;
+        }
+
+        .slider-table tbody tr {
+            border-bottom: 1px solid var(--border);
+            transition: all 0.3s ease;
+        }
+
+            .slider-table tbody tr:hover {
+                background: linear-gradient(135deg, rgba(246, 177, 122, 0.03), rgba(246, 177, 122, 0.01));
+                transform: scale(1.01);
+            }
+
+            .slider-table tbody tr:last-child {
+                border-bottom: none;
+            }
+
+        .slider-table td {
+            padding: 20px 24px;
+            font-size: 14px;
+            color: var(--text);
+            vertical-align: middle;
+        }
+
+    .slider-preview {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+    }
+
+    .slider-image {
+        width: 80px;
+        height: 50px;
+        border-radius: 8px;
+        object-fit: cover;
+        border: 2px solid var(--border);
+        box-shadow: var(--shadow-sm);
+        transition: all 0.3s ease;
+    }
+
+        .slider-image:hover {
+            transform: scale(1.5);
+            box-shadow: var(--shadow-lg);
+            z-index: 10;
+        }
+
+    .slider-info {
+        flex: 1;
+    }
+
+    .slider-title {
+        font-weight: 600;
+        color: var(--primary);
+        margin-bottom: 4px;
+        font-size: 15px;
+    }
+
+    .slider-subtitle {
+        font-size: 13px;
+        color: var(--text-muted);
+    }
+
+    .slider-description {
+        max-width: 300px;
+        line-height: 1.6;
+        color: var(--text-muted);
+    }
+
+    .text-truncate {
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    .action-buttons {
+        display: flex;
+        gap: 8px;
+    }
+
+    .action-btn {
+        width: 36px;
+        height: 36px;
+        border-radius: 8px;
+        border: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        background: var(--bg);
+    }
+
+        .action-btn svg {
+            width: 18px;
+            height: 18px;
+        }
+
+        .action-btn.edit {
+            color: var(--primary);
+        }
+
+            .action-btn.edit:hover {
+                background: linear-gradient(135deg, #3B82F6, #2563EB);
+                color: white;
+                transform: translateY(-2px);
+                box-shadow: var(--shadow-sm);
+            }
+
+        .action-btn.delete {
+            color: var(--danger);
+        }
+
+            .action-btn.delete:hover {
+                background: linear-gradient(135deg, var(--danger), #DC2626);
+                color: white;
+                transform: translateY(-2px);
+                box-shadow: var(--shadow-sm);
+            }
+
+    /* Empty State */
+    .empty-state {
+        text-align: center;
+        padding: 80px 24px;
+    }
+
+    .empty-icon {
+        width: 80px;
+        height: 80px;
+        margin: 0 auto 24px;
+        background: linear-gradient(135deg, var(--bg), #FAFBFC);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 2px dashed var(--border);
+    }
+
+        .empty-icon svg {
+            width: 40px;
+            height: 40px;
+            color: var(--text-muted);
+        }
+
+    .empty-title {
+        font-size: 20px;
+        font-weight: 600;
+        color: var(--primary);
+        margin-bottom: 8px;
+    }
+
+    .empty-text {
+        font-size: 14px;
+        color: var(--text-muted);
+        margin-bottom: 24px;
+    }
+
+    /* Pagination */
+    .pagination {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 8px;
+        padding: 24px;
+        border-top: 1px solid var(--border);
+    }
+
+    .page-btn {
+        width: 40px;
+        height: 40px;
+        border-radius: 8px;
+        border: 2px solid var(--border);
+        background: white;
+        color: var(--text);
+        font-weight: 600;
+        font-size: 14px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+        .page-btn:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        .page-btn.active {
+            background: linear-gradient(135deg, var(--accent), var(--accent-hover));
+            color: white;
+            border-color: var(--accent);
+        }
+
+        .page-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+    /* Responsive */
+    @@media (max-width: 1024px) {
+        .slider-table th:nth-child(3), .slider-table td:nth-child(3) {
+            display: none;
+        }
+    }
+
+    @@media (max-width: 768px) {
+        .page-header {
+            flex-direction: column;
+        }
+
+        .header-actions {
+            width: 100%;
+            justify-content: stretch;
+        }
+
+        .btn-primary {
+            flex: 1;
+        }
+
+        .stats-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        .control-bar {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .search-box {
+            min-width: 100%;
+        }
+
+        .table-wrapper {
+            overflow-x: scroll;
+        }
+
+        .slider-table {
+            min-width: 800px;
+        }
+    }
+
+    @@media (max-width: 480px) {
+        .stats-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+
+<div class="slider-list-container">
+    <!-- Header -->
+    <div class="page-header">
+        <div class="header-content">
+            <div class="header-text">
+                <h1 class="page-title">Slider Yönetimi</h1>
+                <p class="page-subtitle">Tüm slider'ları görüntüleyin, düzenleyin ve yönetin</p>
+            </div>
+        </div>
+        <div class="header-actions">
+            <a asp-controller="Slider" asp-action="CreateSlider" class="btn btn-primary">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="18" height="18">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                </svg>
+                Yeni Slider Ekle
+            </a>
+            <button class="btn btn-icon" title="Yenile">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="20" height="20">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                </svg>
+            </button>
+        </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-icon primary">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+            </div>
+            <div class="stat-content">
+                <div class="stat-label">Toplam Slider</div>
+                <div class="stat-value">@Model.Count</div>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon success">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+            </div>
+            <div class="stat-content">
+                <div class="stat-label">Aktif</div>
+                <div class="stat-value">@Model.Count</div>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon warning">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                </svg>
+            </div>
+            <div class="stat-content">
+                <div class="stat-label">Görüntüleme</div>
+                <div class="stat-value">@(Model.Count * 1247)</div>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon info">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+            </div>
+            <div class="stat-content">
+                <div class="stat-label">Son Güncelleme</div>
+                <div class="stat-value" style="font-size: 14px;">Bugün</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Search and Filter -->
+    <div class="control-bar">
+        <div class="search-box">
+            <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+            <input type="text" class="search-input" id="searchInput" placeholder="Slider ara..." />
+        </div>
+        <div class="filter-group">
+            <button class="filter-btn active" data-filter="all">Tümü</button>
+            <button class="filter-btn" data-filter="active">Aktif</button>
+            <button class="filter-btn" data-filter="inactive">Pasif</button>
+        </div>
+    </div>
+
+    <!-- Table -->
+    <div class="table-card">
+        <div class="table-wrapper">
+            @if (Model != null && Model.Any())
+            {
+                <table class="slider-table">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Slider Bilgisi</th>
+                            <th>Açıklama</th>
+                            <th>İşlemler</th>
+                        </tr>
+                    </thead>
+                    <tbody id="sliderTableBody">
+                        @for (int i = 0; i < Model.Count; i++)
+                        {
+                            var item = Model[i];
+                            <tr data-slider-id="@item.SliderId">
+                                <td>
+                                    <span style="font-family: 'Space Mono', monospace; font-weight: 600; color: var(--text-muted);">
+                                        @(i + 1).
+                                    </span>
+                                </td>
+                                <td>
+                                    <img src="@item.ImageUrl"
+     alt="@item.SliderTitle"
+     class="slider-image" />
+
+<div class="slider-info">
+    <div class="slider-title">@item.SliderTitle</div>
+    <div class="slider-subtitle">@item.Subtitle</div>
+</div>
+                                </td>
+                                <td>
+                                    <div class="slider-description text-truncate">
+                                        @item.Description
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="action-buttons">
+                                        <a href="/Admin/Slider/UpdateSlider/@item.SliderId" class="action-btn edit" title="Düzenle">
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                            </svg>
+                                        </a>
+                                        <a href="/Admin/Slider/DeleteSlider/@item.SliderId" class="action-btn delete" title="Sil" onclick="return confirm('Bu slider\'ı silmek istediğinizden emin misiniz?')">
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                            </svg>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
+            else
+            {
+                <div class="empty-state">
+                    <div class="empty-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                    </div>
+                    <h3 class="empty-title">Henüz Slider Yok</h3>
+                    <p class="empty-text">Başlamak için ilk slider'ınızı oluşturun</p>
+                    <a asp-controller="Slider" asp-action="CreateSlider" class="btn btn-primary">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="18" height="18">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                        </svg>
+                        İlk Slider'ı Oluştur
+                    </a>
+                </div>
+            }
+        </div>
+
+        @if (Model != null && Model.Any())
+        {
+            <div class="pagination">
+                <button class="page-btn" disabled>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                    </svg>
+                </button>
+                <button class="page-btn active">1</button>
+                <button class="page-btn">2</button>
+                <button class="page-btn">3</button>
+                <button class="page-btn">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                    </svg>
+                </button>
+            </div>
+        }
+    </div>
+</div>
+
+<script>
+    // Search Functionality
+    const searchInput = document.getElementById('searchInput');
+    const tableBody = document.getElementById('sliderTableBody');
+
+    if (searchInput && tableBody) {
+        searchInput.addEventListener('input', (e) => {
+            const searchTerm = e.target.value.toLowerCase();
+            const rows = tableBody.getElementsByTagName('tr');
+
+            Array.from(rows).forEach(row => {
+                const text = row.textContent.toLowerCase();
+                row.style.display = text.includes(searchTerm) ? '' : 'none';
+            });
+        });
+    }
+
+    // Filter Functionality
+    const filterButtons = document.querySelectorAll('.filter-btn');
+
+    filterButtons.forEach(btn => {
+        btn.addEventListener('click', () => {
+            // Remove active class from all buttons
+            filterButtons.forEach(b => b.classList.remove('active'));
+            // Add active class to clicked button
+            btn.classList.add('active');
+
+            // Here you can add filtering logic based on data-filter attribute
+            const filter = btn.getAttribute('data-filter');
+            console.log('Filter:', filter);
+        });
+    });
+
+    // Refresh button
+    const refreshBtn = document.querySelector('.btn-icon');
+    if (refreshBtn) {
+        refreshBtn.addEventListener('click', () => {
+            location.reload();
+        });
+    }
+</script>

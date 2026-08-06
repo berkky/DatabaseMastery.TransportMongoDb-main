@@ -1,0 +1,90 @@
+@model GetGetInTouchByIdDto
+
+@{
+    ViewData["Title"] = "İletişim Alanı Güncelle";
+    Layout = "~/Views/AdminLayout/Index.cshtml";
+}
+
+<div class="page-content">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h4 class="card-title mb-0">İletişim Alanı Güncelle</h4>
+                    </div>
+                    <div class="card-body">
+                        <form asp-controller="GetInTouch"
+                              asp-action="UpdateGetInTouch"
+                              method="post">
+                            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+                            <input asp-for="GetInTouchSectionId" type="hidden" />
+
+                            <div class="mb-3">
+                                <label asp-for="BadgeTitle" class="form-label">Rozet Başlığı</label>
+                                <input asp-for="BadgeTitle" class="form-control" />
+                                <span asp-validation-for="BadgeTitle" class="text-danger"></span>
+                            </div>
+
+                            <div class="mb-3">
+                                <label asp-for="MainTitle" class="form-label">Ana Başlık</label>
+                                <input asp-for="MainTitle" class="form-control" />
+                                <span asp-validation-for="MainTitle" class="text-danger"></span>
+                            </div>
+
+                            <div class="mb-3">
+                                <label asp-for="Description" class="form-label">Açıklama</label>
+                                <textarea asp-for="Description" class="form-control" rows="4"></textarea>
+                                <span asp-validation-for="Description" class="text-danger"></span>
+                            </div>
+
+                            <div class="mb-3">
+                                <label asp-for="Feature1Title" class="form-label">1. Özellik Başlığı</label>
+                                <input asp-for="Feature1Title" class="form-control" />
+                                <span asp-validation-for="Feature1Title" class="text-danger"></span>
+                            </div>
+
+                            <div class="mb-3">
+                                <label asp-for="Feature1Description" class="form-label">1. Özellik Açıklaması</label>
+                                <textarea asp-for="Feature1Description" class="form-control" rows="3"></textarea>
+                                <span asp-validation-for="Feature1Description" class="text-danger"></span>
+                            </div>
+
+                            <div class="mb-3">
+                                <label asp-for="Feature2Title" class="form-label">2. Özellik Başlığı</label>
+                                <input asp-for="Feature2Title" class="form-control" />
+                                <span asp-validation-for="Feature2Title" class="text-danger"></span>
+                            </div>
+
+                            <div class="mb-3">
+                                <label asp-for="Feature2Description" class="form-label">2. Özellik Açıklaması</label>
+                                <textarea asp-for="Feature2Description" class="form-control" rows="3"></textarea>
+                                <span asp-validation-for="Feature2Description" class="text-danger"></span>
+                            </div>
+
+                            <div class="mb-3">
+                                <label asp-for="ImageUrl" class="form-label">Görsel URL</label>
+                                <input asp-for="ImageUrl"
+                                       class="form-control"
+                                       placeholder="/templates/assets/imgs/page/homepage1/port.png" />
+                                <span asp-validation-for="ImageUrl" class="text-danger"></span>
+                            </div>
+
+                            <div class="form-check mb-3">
+                                <input asp-for="Status" class="form-check-input" />
+                                <label asp-for="Status" class="form-check-label">Ana sayfada göster</label>
+                            </div>
+
+                            <button type="submit" class="btn btn-primary">Güncelle</button>
+                            <a asp-controller="GetInTouch"
+                               asp-action="GetInTouchlist"
+                               class="btn btn-secondary">
+                                İptal
+                            </a>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

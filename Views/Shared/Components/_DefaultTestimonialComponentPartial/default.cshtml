@@ -1,0 +1,113 @@
+﻿@model List<ResultTestimonialDto>
+
+@functions {
+    private static string ResolveTestimonialImageUrl(string? imageUrl)
+    {
+        const string fallbackImageUrl =
+            "/templates/assets/imgs/page/homepage1/author.png";
+
+        if (string.IsNullOrWhiteSpace(imageUrl))
+        {
+            return fallbackImageUrl;
+        }
+
+        var value = imageUrl.Trim();
+        if (value.StartsWith("//", StringComparison.Ordinal))
+        {
+            return fallbackImageUrl;
+        }
+
+        if (value.StartsWith("/", StringComparison.Ordinal))
+        {
+            return value;
+        }
+
+        if (value.StartsWith("~/", StringComparison.Ordinal))
+        {
+            return value[1..];
+        }
+
+        if (Uri.TryCreate(value, UriKind.Absolute, out var absoluteUri))
+        {
+            return absoluteUri.Scheme is "http" or "https"
+                ? value
+                : fallbackImageUrl;
+        }
+
+        return $"/{value.Replace('\\', '/').TrimStart('/')}";
+    }
+}
+
+<section class="section mt-50 bg-customers-say">
+    <div class="container">
+        <h2 class="title-favicon color-white mb-20 title-padding-left">Müşterilerimiz Bizim İçin Ne Dediler</h2>
+        <p class="font-lg color-white pl-55">Hear from our users who have saved thousands on their <br class="d-none d-lg-block">Startup and SaaS solution spend.</p>
+    </div>
+    <div class="box-slide-customers mt-50">
+        <div class="box-swiper">
+            <div class="swiper-container swiper-group-3-customers pb-50">
+                <div class="swiper-wrapper">
+                    @foreach (var item in Model.Where(item => item.Status))
+                    {
+                        var reviewScore = Math.Clamp(item.ReviewScore, 0, 5);
+
+                        <div class="swiper-slide">
+                            <div class="card-testimonial-grid">
+                                <div class="box-author mb-25">
+                                    <a href="#">
+                                        <img src="@ResolveTestimonialImageUrl(item.ImageUrl)"
+                                             alt="@item.NameSurname">
+                                    </a>
+                                    <div class="author-info">
+                                        <a href="#">
+                                            <span class="font-xl-bold color-brand-2 author-name">
+                                                @item.NameSurname
+                                            </span>
+                                        </a>
+                                        <span class="font-sm color-grey-500 department">
+                                            @item.Title
+                                        </span>
+                                    </div>
+                                </div>
+                                <p class="font-md color-grey-700">
+                                    @item.ReviewDetail
+                                </p>
+                                <div class="card-bottom-info justify-content-between">
+                                    <div class="rating text-start">
+                                        @for (var starIndex = 1; starIndex <= 5; starIndex++)
+                                        {
+                                            var starImageUrl = starIndex <= reviewScore
+                                                ? "/templates/assets/imgs/template/icons/star.svg"
+                                                : "/templates/assets/imgs/template/icons/star-gray.svg";
+
+                                            <img src="@starImageUrl" alt="Yıldız">
+                                        }
+                                        <br>
+                                        <span class="font-sm color-white">
+                                            For customer support
+                                        </span>
+                                    </div>
+                                    <span class="font-xs color-grey-500 rate-post text-end">
+                                        Rate: @reviewScore / 5
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+                <div class="box-pagination-customers">
+                    <div class="swiper-button-prev swiper-button-prev-customers swiper-button-prev-style-1">
+                        <svg fill="none" stroke="currentColor" stroke-width="1.5" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18"></path>
+                        </svg>
+                    </div>
+                    <div class="swiper-button-next swiper-button-next-customers swiper-button-next-style-1">
+                        <svg fill="none" stroke="currentColor" stroke-width="1.5" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"></path>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

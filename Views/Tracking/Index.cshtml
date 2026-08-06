@@ -1,0 +1,539 @@
+@using System.Globalization
+@model GetShipmentByIdDto?
+
+@{
+    Layout = null;
+
+    var hasSearched = ViewBag.HasSearched is bool searched && searched;
+    var searchedNumber = ViewBag.SearchedNumber as string ?? string.Empty;
+    var validationMessage = ViewBag.ValidationMessage as string;
+    var trackings = Model?.Trackings?
+        .OrderByDescending(x => x.EventDate)
+        .ToList();
+    var turkishCulture = CultureInfo.GetCultureInfo("tr-TR");
+
+    string GetStatusClass(string? status) => status?.Trim() switch
+    {
+        "Teslim Edildi" => "is-delivered",
+        "Dağıtımda" => "is-transit",
+        "Transfer Merkezinde" => "is-transit",
+        _ => "is-processing"
+    };
+}
+
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="description" content="Takip numaranızla gönderinizin güncel durumunu ve kargo hareketlerini görüntüleyin.">
+    <link rel="shortcut icon" type="image/x-icon" href="/templates/assets/imgs/template/favicon.svg">
+    <link href="/templates/assets/css/style.css?v=3.0.0" rel="stylesheet">
+    <title>Kargo Takip - Transp Lojistik</title>
+    <style>
+        .tracking-public-page {
+            background: #f7f9fb;
+        }
+
+        .tracking-public-page .tracking-query-section {
+            min-height: 570px;
+            overflow: hidden;
+        }
+
+        .tracking-public-page .box-info-trackyourparcel {
+            max-width: 720px;
+        }
+
+        .tracking-public-page .form-trackparcel {
+            margin-bottom: 0;
+        }
+
+        .tracking-public-page .tracking-home-link {
+            display: inline-block;
+            margin-bottom: 18px;
+            color: #034460;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .tracking-public-page .tracking-validation {
+            margin: 14px 0 0;
+            color: #b42318;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .tracking-public-page .tracking-results-section {
+            padding: 70px 0 90px;
+        }
+
+        .tracking-public-page .tracking-message {
+            max-width: 820px;
+            margin: 0 auto;
+            padding: 32px;
+            border: 1px solid #f4c7c3;
+            border-radius: 18px;
+            background: #fff5f4;
+            color: #7a271a;
+            text-align: center;
+        }
+
+        .tracking-public-page .tracking-message h2 {
+            margin-bottom: 10px;
+            color: #7a271a;
+            font-size: 28px;
+        }
+
+        .tracking-public-page .tracking-result-card {
+            overflow: hidden;
+            border: 1px solid #e8edf1;
+            border-radius: 22px;
+            background: #fff;
+            box-shadow: 0 18px 48px rgba(3, 68, 96, 0.08);
+        }
+
+        .tracking-public-page .tracking-result-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 24px;
+            padding: 32px 36px;
+            background: linear-gradient(135deg, #034460, #05668d);
+            color: #fff;
+        }
+
+        .tracking-public-page .tracking-result-label {
+            display: block;
+            margin-bottom: 7px;
+            color: rgba(255, 255, 255, 0.75);
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+
+        .tracking-public-page .tracking-number {
+            color: #fff;
+            font-family: monospace;
+            font-size: 30px;
+            font-weight: 700;
+            overflow-wrap: anywhere;
+        }
+
+        .tracking-public-page .tracking-status {
+            display: inline-flex;
+            align-items: center;
+            min-height: 42px;
+            padding: 9px 16px;
+            border: 1px solid rgba(255, 255, 255, 0.35);
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.14);
+            color: #fff;
+            font-size: 14px;
+            font-weight: 700;
+            text-align: center;
+        }
+
+        .tracking-public-page .tracking-summary {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 22px;
+            padding: 34px 36px;
+            border-bottom: 1px solid #e8edf1;
+        }
+
+        .tracking-public-page .tracking-summary-item {
+            padding: 18px 20px;
+            border-radius: 14px;
+            background: #f7f9fb;
+        }
+
+        .tracking-public-page .tracking-summary-item span {
+            display: block;
+            margin-bottom: 5px;
+            color: #667085;
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .tracking-public-page .tracking-summary-item strong {
+            color: #101828;
+            font-size: 16px;
+            font-weight: 700;
+        }
+
+        .tracking-public-page .tracking-route {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+            align-items: center;
+            gap: 20px;
+            padding: 28px 36px;
+            border-bottom: 1px solid #e8edf1;
+        }
+
+        .tracking-public-page .tracking-route-point:last-child {
+            text-align: right;
+        }
+
+        .tracking-public-page .tracking-route-point span {
+            display: block;
+            margin-bottom: 5px;
+            color: #667085;
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .tracking-public-page .tracking-route-point strong {
+            color: #034460;
+            font-size: 20px;
+        }
+
+        .tracking-public-page .tracking-route-line {
+            width: 120px;
+            height: 2px;
+            background: #fdb022;
+            position: relative;
+        }
+
+        .tracking-public-page .tracking-route-line::after {
+            content: "";
+            position: absolute;
+            top: -4px;
+            right: -1px;
+            width: 10px;
+            height: 10px;
+            border-top: 2px solid #fdb022;
+            border-right: 2px solid #fdb022;
+            transform: rotate(45deg);
+        }
+
+        .tracking-public-page .tracking-timeline-wrapper {
+            padding: 34px 36px 40px;
+        }
+
+        .tracking-public-page .tracking-timeline-title {
+            margin-bottom: 28px;
+            color: #034460;
+            font-size: 24px;
+        }
+
+        .tracking-public-page .tracking-timeline {
+            position: relative;
+            margin: 0;
+            padding: 0;
+            list-style: none;
+        }
+
+        .tracking-public-page .tracking-timeline::before {
+            content: "";
+            position: absolute;
+            top: 8px;
+            bottom: 8px;
+            left: 9px;
+            width: 2px;
+            background: #dfe6eb;
+        }
+
+        .tracking-public-page .tracking-timeline-item {
+            position: relative;
+            padding: 0 0 28px 42px;
+        }
+
+        .tracking-public-page .tracking-timeline-item:last-child {
+            padding-bottom: 0;
+        }
+
+        .tracking-public-page .tracking-timeline-marker {
+            position: absolute;
+            top: 4px;
+            left: 0;
+            z-index: 1;
+            width: 20px;
+            height: 20px;
+            border: 4px solid #fff;
+            border-radius: 50%;
+            background: #fdb022;
+            box-shadow: 0 0 0 2px #fdb022;
+        }
+
+        .tracking-public-page .tracking-timeline-marker.is-transit {
+            background: #05668d;
+            box-shadow: 0 0 0 2px #05668d;
+        }
+
+        .tracking-public-page .tracking-timeline-marker.is-delivered {
+            background: #12b76a;
+            box-shadow: 0 0 0 2px #12b76a;
+        }
+
+        .tracking-public-page .tracking-timeline-content {
+            padding: 20px 22px;
+            border: 1px solid #e8edf1;
+            border-radius: 14px;
+            background: #f9fbfc;
+        }
+
+        .tracking-public-page .tracking-timeline-heading {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 18px;
+            margin-bottom: 9px;
+        }
+
+        .tracking-public-page .tracking-timeline-heading strong {
+            color: #101828;
+            font-size: 16px;
+        }
+
+        .tracking-public-page .tracking-timeline-heading time {
+            color: #667085;
+            font-size: 13px;
+            white-space: nowrap;
+        }
+
+        .tracking-public-page .tracking-location {
+            margin-bottom: 7px;
+            color: #034460;
+            font-size: 14px;
+            font-weight: 700;
+        }
+
+        .tracking-public-page .tracking-description {
+            margin: 0;
+            color: #667085;
+            font-size: 14px;
+        }
+
+        .tracking-public-page .tracking-empty {
+            margin: 0;
+            padding: 24px;
+            border-radius: 14px;
+            background: #f7f9fb;
+            color: #667085;
+            text-align: center;
+        }
+
+        .tracking-public-page .tracking-back {
+            margin-top: 28px;
+            text-align: center;
+        }
+
+        @@media (max-width: 767px) {
+            .tracking-public-page .tracking-query-section {
+                min-height: 620px;
+            }
+
+            .tracking-public-page .box-info-trackyourparcel {
+                padding-right: 16px;
+                padding-left: 16px;
+            }
+
+            .tracking-public-page .form-trackparcel form .form-group {
+                display: block;
+            }
+
+            .tracking-public-page .form-trackparcel form .form-group .btn-track {
+                position: static;
+                width: 100%;
+                margin-top: 12px;
+            }
+
+            .tracking-public-page .tracking-result-header,
+            .tracking-public-page .tracking-timeline-heading {
+                align-items: flex-start;
+                flex-direction: column;
+            }
+
+            .tracking-public-page .tracking-result-header,
+            .tracking-public-page .tracking-summary,
+            .tracking-public-page .tracking-route,
+            .tracking-public-page .tracking-timeline-wrapper {
+                padding-right: 22px;
+                padding-left: 22px;
+            }
+
+            .tracking-public-page .tracking-number {
+                font-size: 22px;
+            }
+
+            .tracking-public-page .tracking-summary {
+                grid-template-columns: 1fr;
+            }
+
+            .tracking-public-page .tracking-route {
+                grid-template-columns: 1fr;
+            }
+
+            .tracking-public-page .tracking-route-line {
+                width: 2px;
+                height: 45px;
+                margin-left: 10px;
+            }
+
+            .tracking-public-page .tracking-route-line::after {
+                top: auto;
+                right: -4px;
+                bottom: 0;
+                transform: rotate(135deg);
+            }
+
+            .tracking-public-page .tracking-route-point:last-child {
+                text-align: left;
+            }
+
+            .tracking-public-page .tracking-timeline-heading time {
+                white-space: normal;
+            }
+        }
+    </style>
+</head>
+<body class="tracking-public-page">
+    @await Component.InvokeAsync("_DefaultBoxBarComponentPartial")
+    @await Component.InvokeAsync("_DefaultHeaderComponentPartial")
+    @await Component.InvokeAsync("_DefaultMobileMenuComponentPartial")
+
+    <main class="main">
+        <section class="section d-block tracking-query-section">
+            <div class="container position-relative">
+                <div class="banner-trackyourparcel"></div>
+                <div class="box-info-trackyourparcel">
+                    <a class="tracking-home-link" href="/Default/Index/">Ana Sayfa / Kargo Takip</a>
+                    <h1 class="color-brand-2 mb-25">Kargo Takip Sistemi</h1>
+                    <p class="color-grey-900 font-md">
+                        Takip numaranızı girerek gönderinizin güncel durumunu ve hareket geçmişini görüntüleyin.
+                    </p>
+
+                    <div class="form-trackparcel">
+                        <form method="get" action="/Tracking/Index/">
+                            <div class="form-group">
+                                <label class="visually-hidden" for="trackingNumber">Takip numarası</label>
+                                <input class="form-control"
+                                       id="trackingNumber"
+                                       name="trackingNumber"
+                                       type="text"
+                                       value="@searchedNumber"
+                                       placeholder="Takip numaranızı girin"
+                                       autocomplete="off"
+                                       aria-describedby="trackingValidation"
+                                       aria-invalid="@(!string.IsNullOrWhiteSpace(validationMessage) ? "true" : "false")">
+                                <button class="btn btn-brand-1 btn-track" type="submit">Kargomu Sorgula</button>
+                            </div>
+
+                            @if (!string.IsNullOrWhiteSpace(validationMessage))
+                            {
+                                <p class="tracking-validation" id="trackingValidation" role="alert">
+                                    @validationMessage
+                                </p>
+                            }
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        @if (hasSearched && string.IsNullOrWhiteSpace(validationMessage))
+        {
+            <section class="section tracking-results-section" aria-live="polite">
+                <div class="container">
+                    @if (Model is null)
+                    {
+                        <div class="tracking-message" role="status">
+                            <h2>Kargo bulunamadı</h2>
+                            <p class="mb-0">
+                                <strong>@searchedNumber</strong> takip numarasına ait bir gönderi bulunamadı.
+                                Lütfen numarayı kontrol edip tekrar deneyin.
+                            </p>
+                        </div>
+                    }
+                    else
+                    {
+                        <article class="tracking-result-card">
+                            <header class="tracking-result-header">
+                                <div>
+                                    <span class="tracking-result-label">Takip Numarası</span>
+                                    <div class="tracking-number">@Model.TrackingNumber</div>
+                                </div>
+                                <span class="tracking-status @GetStatusClass(Model.CurrentStatus)">
+                                    @Model.CurrentStatus
+                                </span>
+                            </header>
+
+                            <div class="tracking-summary">
+                                <div class="tracking-summary-item">
+                                    <span>Gönderici</span>
+                                    <strong>@Model.SenderName</strong>
+                                </div>
+                                <div class="tracking-summary-item">
+                                    <span>Alıcı</span>
+                                    <strong>@Model.ReceiverName</strong>
+                                </div>
+                                <div class="tracking-summary-item">
+                                    <span>Güncel Durum</span>
+                                    <strong>@Model.CurrentStatus</strong>
+                                </div>
+                                <div class="tracking-summary-item">
+                                    <span>Oluşturulma Tarihi</span>
+                                    <strong>@Model.CreatedDate.ToString("dd MMMM yyyy, HH:mm", turkishCulture)</strong>
+                                </div>
+                            </div>
+
+                            <div class="tracking-route" aria-label="Gönderi rotası">
+                                <div class="tracking-route-point">
+                                    <span>Çıkış Şehri</span>
+                                    <strong>@Model.DepartureCity</strong>
+                                </div>
+                                <div class="tracking-route-line" aria-hidden="true"></div>
+                                <div class="tracking-route-point">
+                                    <span>Varış Şehri</span>
+                                    <strong>@Model.ArrivalCity</strong>
+                                </div>
+                            </div>
+
+                            <div class="tracking-timeline-wrapper">
+                                <h2 class="tracking-timeline-title">Kargo Hareketleri</h2>
+
+                                @if (trackings is { Count: > 0 })
+                                {
+                                    <ol class="tracking-timeline">
+                                        @foreach (var tracking in trackings)
+                                        {
+                                            <li class="tracking-timeline-item">
+                                                <span class="tracking-timeline-marker @GetStatusClass(tracking.TrackingStatus)"
+                                                      aria-hidden="true"></span>
+                                                <div class="tracking-timeline-content">
+                                                    <div class="tracking-timeline-heading">
+                                                        <strong>@tracking.TrackingStatus</strong>
+                                                        <time datetime="@tracking.EventDate.ToString("O", CultureInfo.InvariantCulture)">
+                                                            @tracking.EventDate.ToString("dd MMMM yyyy, HH:mm", turkishCulture)
+                                                        </time>
+                                                    </div>
+                                                    <div class="tracking-location">@tracking.Location</div>
+                                                    <p class="tracking-description">@tracking.Description</p>
+                                                </div>
+                                            </li>
+                                        }
+                                    </ol>
+                                }
+                                else
+                                {
+                                    <p class="tracking-empty">Henüz bir kargo hareketi kaydedilmemiş.</p>
+                                }
+                            </div>
+                        </article>
+                    }
+
+                    <div class="tracking-back">
+                        <a class="btn btn-brand-2" href="/Default/Index/">Ana Sayfaya Dön</a>
+                    </div>
+                </div>
+            </section>
+        }
+    </main>
+
+    @await Component.InvokeAsync("_DefaultFooterComponentPartial")
+    @await Component.InvokeAsync("_DefaultScriptsComponentPartial")
+</body>
+</html>

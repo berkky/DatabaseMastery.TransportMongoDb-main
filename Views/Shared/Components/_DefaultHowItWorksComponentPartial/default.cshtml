@@ -1,0 +1,39 @@
+﻿@model List<ResultHowItWorksDto>
+
+<section class="section pt-85 bg-worldmap">
+    <div class="container">
+        <div class="text-center">
+            <img class="mb-15" src="/templates/assets/imgs/template/icons/favicon.svg" alt="transp">
+            <h2 class="color-brand-2 mb-20">Nasıl Çalışıyoruz?</h2>
+            <p class="font-md color-grey-700">You choose the cities where you’d like to deliver. All deliveries are within a specific service area and delivery services vary by location. Whatever the mode or requirement, we will find and book the ideal expedited shipping solution to ensure a timely delivery.</p>
+        </div>
+        <div class="row mt-50">
+            <div class="col-lg-6 mb-30">
+                <div class="box-image-how">
+                    <img class="w-100" src="/templates/assets/imgs/page/homepage1/how-it-work.png" alt="transp">
+                    <div class="box-info-bottom-img">
+                        <div class="image-play"><img class="mb-15" src="/templates/assets/imgs/template/icons/play.svg" alt="transp"></div>
+                        <div class="info-play">
+                            <h4 class="color-white mb-15">We have 25 years experience in this passion</h4>
+                            <p class="font-sm color-white">There are many variations of passages of Lorem Ipsum available, but the majority have suffered alteration in some form, by injected humour</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6 mb-30">
+                <ul class="list-how-works">
+                    @foreach (var item in Model)
+                    {
+                        <li>
+                            <div class="image-how"> <span class="img"> <img src="@item.ImageUrl" alt="@item.Title"></span></div>
+                            <div class="info-how">
+                                <h5 class="color-brand-2">@item.Title</h5>
+                                <p class="font-md color-grey-700">@item.Description</p>
+                            </div>
+                        </li>
+                    }
+                </ul>
+            </div>
+        </div>
+    </div>
+</section>

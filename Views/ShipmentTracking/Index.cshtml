@@ -1,0 +1,131 @@
+@using DatabaseMastery.TransportMongoDb.Dtos.ShipmentTrackingDtos
+@model List<ResultShipmentTrackingDto>
+
+@{
+    ViewData["Title"] = "Kargo Hareketleri";
+    Layout = "~/Views/AdminLayout/Index.cshtml";
+
+    var trackingNumber = ViewBag.TrackingNumber as string ?? string.Empty;
+    var trackings = Model ?? new List<ResultShipmentTrackingDto>();
+
+    string GetTimelineDotClass(string trackingStatus) => trackingStatus switch
+    {
+        "Gönderi Alındı" => "timeline-dot-purple",
+        "Transfer Merkezinde" => "timeline-dot-info",
+        _ => "timeline-dot-primary"
+    };
+
+    string GetStatusBadgeClass(string trackingStatus) => trackingStatus switch
+    {
+        "Gönderi Alındı" => "bg-secondary",
+        "Transfer Merkezinde" => "bg-info",
+        "Yolda" => "bg-primary",
+        "Dağıtımda" => "bg-warning text-dark",
+        "Teslim Edildi" => "bg-success",
+        _ => "bg-light text-dark"
+    };
+}
+
+<div class="page-content">
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-header d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+                    <div>
+                        <nav aria-label="breadcrumb">
+                            <ol class="breadcrumb mb-2">
+                                <li class="breadcrumb-item">
+                                    <a asp-controller="Shipment" asp-action="ShipmentList">Gönderiler</a>
+                                </li>
+                                <li class="breadcrumb-item active" aria-current="page">Kargo Hareketleri</li>
+                            </ol>
+                        </nav>
+                        <h4 class="card-title mb-1">Kargo Hareketleri</h4>
+                        @if (string.IsNullOrWhiteSpace(trackingNumber))
+                        {
+                            <p class="text-muted mb-0">Takip numarası belirtilmedi.</p>
+                        }
+                        else
+                        {
+                            <p class="text-muted mb-0">Takip numarası: <span class="fw-semibold">@trackingNumber</span></p>
+                        }
+                    </div>
+
+                    <div class="d-flex flex-wrap gap-2">
+                        <a asp-controller="Shipment"
+                           asp-action="ShipmentList"
+                           class="btn btn-secondary">
+                            Gönderi Listesine Dön
+                        </a>
+                        @if (!string.IsNullOrWhiteSpace(trackingNumber))
+                        {
+                            <a asp-controller="ShipmentTracking"
+                               asp-action="AddTracking"
+                               asp-route-trackingNumber="@trackingNumber"
+                               class="btn btn-success">
+                                Yeni Hareket Ekle
+                            </a>
+                        }
+                    </div>
+                </div>
+
+                <div class="card-body p-4">
+                    @if (TempData["Success"] is string successMessage)
+                    {
+                        <div class="alert alert-success" role="alert">
+                            @successMessage
+                        </div>
+                    }
+
+                    @if (trackings.Count == 0)
+                    {
+                        <div class="text-center py-5">
+                            <h5 class="mb-2">Henüz Hareket Yok</h5>
+                            <p class="text-muted mb-0">Bu kargo için henüz hareket kaydı bulunmuyor.</p>
+                        </div>
+                    }
+                    else
+                    {
+                        <ul class="simple-timeline mb-0" aria-label="Kargo hareket geçmişi">
+                            @for (var index = 0; index < trackings.Count; index++)
+                            {
+                                var tracking = trackings[index];
+                                var trackingStatus = tracking.TrackingStatus ?? string.Empty;
+                                var eventDateIso = tracking.EventDate.ToString("O");
+                                <li class="timeline-item timeline-item-transparent">
+                                    <span class="timeline-dot @GetTimelineDotClass(trackingStatus)" aria-hidden="true"></span>
+                                    <div class="timeline-time">
+                                        <div class="timeline-header-section mb-2">
+                                            <h5 class="mb-0">@tracking.Location</h5>
+                                            <time class="text-muted" datetime="@eventDateIso">
+                                                @tracking.EventDate.ToString("dd.MM.yyyy HH:mm")
+                                            </time>
+                                        </div>
+                                        <p class="mb-2">@tracking.Description</p>
+                                        <span class="badge @GetStatusBadgeClass(trackingStatus)">@trackingStatus</span>
+                                        <div class="d-flex flex-wrap gap-2 mt-3">
+                                            <a asp-controller="ShipmentTracking"
+                                               asp-action="UpdateTracking"
+                                               asp-route-trackingNumber="@trackingNumber"
+                                               asp-route-index="@index"
+                                               class="btn btn-sm btn-primary">
+                                                Güncelle
+                                            </a>
+                                            <a asp-controller="ShipmentTracking"
+                                               asp-action="DeleteTracking"
+                                               asp-route-trackingNumber="@trackingNumber"
+                                               asp-route-index="@index"
+                                               class="btn btn-sm btn-danger">
+                                                Sil
+                                            </a>
+                                        </div>
+                                    </div>
+                                </li>
+                            }
+                        </ul>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,97 @@
+@model List<ResultProjectDto>
+
+@functions {
+    private static string ResolveProjectImageUrl(string? imageUrl)
+    {
+        const string fallbackImageUrl =
+            "/templates/assets/imgs/page/homepage1/img.png";
+
+        if (string.IsNullOrWhiteSpace(imageUrl))
+        {
+            return fallbackImageUrl;
+        }
+
+        var value = imageUrl.Trim();
+        if (value.StartsWith("//", StringComparison.Ordinal))
+        {
+            return fallbackImageUrl;
+        }
+
+        if (value.StartsWith("~/", StringComparison.Ordinal))
+        {
+            return value[1..];
+        }
+
+        if (value.StartsWith("/", StringComparison.Ordinal))
+        {
+            return value;
+        }
+
+        if (Uri.TryCreate(value, UriKind.Absolute, out var absoluteUri))
+        {
+            return absoluteUri.Scheme is "http" or "https"
+                ? value
+                : fallbackImageUrl;
+        }
+
+        return $"/{value.Replace('\\', '/').TrimStart('/')}";
+    }
+}
+
+<section class="section bg-what-done pb-95 pt-110">
+    <div class="container">
+        <h2 class="title-favicon mb-20">Neler Başardık?</h2>
+        <div class="row align-items-end">
+            <div class="col-lg-8 col-md-8 mb-30">
+                <p class="font-md color-gray-700">Check out some of the projects we've completed with our amazing partners</p>
+            </div>
+            <div class="col-lg-4 col-md-4 mb-30 text-md-end text-start">
+                <a asp-controller="Project"
+                   asp-action="ProjectList"
+                   class="btn btn-brand-1 hover-up">
+                    <svg class="mr-10" fill="none" stroke="currentColor" stroke-width="1.5" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25"></path>
+                    </svg>View All Projects
+                </a>
+            </div>
+        </div>
+        @if (Model.Count > 0)
+        {
+            <div class="mt-35">
+                <div class="box-swiper">
+                    <div class="swiper-container swiper-group-4 pb-50">
+                        <div class="swiper-wrapper">
+                            @foreach (var item in Model)
+                            {
+                                <div class="swiper-slide">
+                                    <div class="cardGrid">
+                                        <div class="cardImage">
+                                            <img src="@ResolveProjectImageUrl(item.ImageUrl)"
+                                                 alt="@item.Title">
+                                        </div>
+                                        <div class="cardInfo">
+                                            <h5 class="color-brand-2 mb-10">@item.Title</h5>
+                                            <p class="font-xs color-grey-500">@item.Description</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                        <div class="box-pagination-customers text-center">
+                            <div class="swiper-button-prev swiper-button-prev-style-1 swiper-button-prev-group-4">
+                                <svg fill="none" stroke="currentColor" stroke-width="1.5" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18"></path>
+                                </svg>
+                            </div>
+                            <div class="swiper-button-next swiper-button-next-style-1 swiper-button-next-group-4">
+                                <svg fill="none" stroke="currentColor" stroke-width="1.5" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"></path>
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</section>

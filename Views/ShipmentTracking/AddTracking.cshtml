@@ -1,0 +1,168 @@
+@using DatabaseMastery.TransportMongoDb.Dtos.ShipmentTrackingDtos
+@using DatabaseMastery.TransportMongoDb.Entities
+@model CreateShipmentTrackingDto
+
+@{
+    ViewData["Title"] = "Hareket Ekle";
+    Layout = "~/Views/AdminLayout/Index.cshtml";
+
+    var trackingNumber = Model?.TrackingNumber ?? ViewBag.TrackingNumber as string ?? string.Empty;
+    var senderName = ViewBag.SenderName as string ?? string.Empty;
+    var receiverName = ViewBag.ReceiverName as string ?? string.Empty;
+    var originCity = ViewBag.OriginCity as string ?? string.Empty;
+    var destinationCity = ViewBag.DestinationCity as string ?? string.Empty;
+    var currentStatus = ViewBag.CurrentStatus as string ?? string.Empty;
+    var existingTrackings = ViewBag.ExistingTrackings as List<ShipmentTracking>
+        ?? new List<ShipmentTracking>();
+}
+
+<div class="page-content">
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-header d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+                    <div>
+                        <nav aria-label="breadcrumb">
+                            <ol class="breadcrumb mb-2">
+                                <li class="breadcrumb-item">
+                                    <a asp-controller="Shipment" asp-action="ShipmentList">Gönderiler</a>
+                                </li>
+                                <li class="breadcrumb-item">
+                                    @if (!string.IsNullOrWhiteSpace(trackingNumber))
+                                    {
+                                        <a asp-controller="ShipmentTracking"
+                                           asp-action="Index"
+                                           asp-route-trackingNumber="@trackingNumber">Kargo Hareketleri</a>
+                                    }
+                                    else
+                                    {
+                                        <span>Kargo Hareketleri</span>
+                                    }
+                                </li>
+                                <li class="breadcrumb-item active" aria-current="page">Hareket Ekle</li>
+                            </ol>
+                        </nav>
+                        <h4 class="card-title mb-1">Yeni Kargo Hareketi</h4>
+                        <p class="text-muted mb-0">Takip numarası: <span class="fw-semibold">@trackingNumber</span></p>
+                    </div>
+
+                    @if (!string.IsNullOrWhiteSpace(trackingNumber))
+                    {
+                        <a asp-controller="ShipmentTracking"
+                           asp-action="Index"
+                           asp-route-trackingNumber="@trackingNumber"
+                           class="btn btn-secondary">
+                            Hareket Listesine Dön
+                        </a>
+                    }
+                    else
+                    {
+                        <a asp-controller="Shipment"
+                           asp-action="ShipmentList"
+                           class="btn btn-secondary">
+                            Gönderi Listesine Dön
+                        </a>
+                    }
+                </div>
+
+                <div class="card-body">
+                    <div class="border rounded p-3 mb-4">
+                        <h5 class="h6 mb-3">Gönderi Özeti</h5>
+                        <div class="row g-3">
+                            <div class="col-md-6"><span class="text-muted small d-block">Gönderici</span>@senderName</div>
+                            <div class="col-md-6"><span class="text-muted small d-block">Alıcı</span>@receiverName</div>
+                            <div class="col-md-4"><span class="text-muted small d-block">Çıkış Şehri</span>@originCity</div>
+                            <div class="col-md-4"><span class="text-muted small d-block">Varış Şehri</span>@destinationCity</div>
+                            <div class="col-md-4"><span class="text-muted small d-block">Mevcut Durum</span>@currentStatus</div>
+                        </div>
+                    </div>
+
+                    @if (existingTrackings.Count > 0)
+                    {
+                        <div class="border rounded p-3 mb-4">
+                            <h5 class="h6 mb-3">Mevcut Hareketler</h5>
+                            <div class="list-group list-group-flush">
+                                @foreach (var tracking in existingTrackings)
+                                {
+                                    <div class="list-group-item px-0">
+                                        <div class="d-flex justify-content-between gap-3">
+                                            <div>
+                                                <div class="fw-semibold">@tracking.Location</div>
+                                                <div class="text-muted small">@tracking.Description</div>
+                                            </div>
+                                            <div class="text-end">
+                                                <span class="badge bg-light text-dark">@tracking.TrackingStatus</span>
+                                                <div class="text-muted small mt-1">@tracking.EventDate.ToString("dd.MM.yyyy HH:mm")</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    }
+
+                    <form asp-controller="ShipmentTracking"
+                          asp-action="AddTracking"
+                          method="post">
+                        <input type="hidden" asp-for="TrackingNumber" />
+
+                        <div class="row g-4" aria-label="Kargo hareketi bilgileri">
+                            <div class="col-12">
+                                <div class="border rounded p-3">
+                                    <h5 class="h6 mb-1">Takip Bilgisi</h5>
+                                    <p class="text-muted small mb-3">Hareketin ait olduğu gönderi.</p>
+
+                                    <div class="row g-3">
+                                        <div class="col-md-6">
+                                            <label class="form-label">Takip Numarası</label>
+                                            <div class="form-control bg-light" aria-readonly="true">@trackingNumber</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-12">
+                                <div class="border rounded p-3">
+                                    <h5 class="h6 mb-1">Hareket Detayları</h5>
+                                    <p class="text-muted small mb-3">Tarih, konum, açıklama ve durum bilgilerini girin.</p>
+
+                                    <div class="row g-3">
+                                        <div class="col-md-6">
+                                            <label asp-for="EventDate" class="form-label">Hareket Tarihi</label>
+                                            <input asp-for="EventDate" type="datetime-local" class="form-control" />
+                                            <span asp-validation-for="EventDate" class="text-danger"></span>
+                                        </div>
+
+                                        <div class="col-md-6">
+                                            <label asp-for="Location" class="form-label">Lokasyon</label>
+                                            <input asp-for="Location" class="form-control" />
+                                            <span asp-validation-for="Location" class="text-danger"></span>
+                                        </div>
+
+                                        <div class="col-md-6">
+                                            <label asp-for="TrackingStatus" class="form-label">Kargo Durumu</label>
+                                            <input asp-for="TrackingStatus" class="form-control" />
+                                            <span asp-validation-for="TrackingStatus" class="text-danger"></span>
+                                        </div>
+
+                                        <div class="col-12">
+                                            <label asp-for="Description" class="form-label">Açıklama</label>
+                                            <textarea asp-for="Description" class="form-control" rows="4"></textarea>
+                                            <span asp-validation-for="Description" class="text-danger"></span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-end mt-4 pt-3 border-top">
+                            <button type="submit" class="btn btn-primary">
+                                Hareketi Kaydet
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
