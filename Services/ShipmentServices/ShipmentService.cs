@@ -118,7 +118,8 @@ namespace DatabaseMastery.TransportMongoDb.Services.ShipmentServices
                 .Include(x => x.ArrivalCity)
                 .Include(x => x.CreatedDate)
                 .Include("Trackings.EventDate")
-                .Include("Trackings.TrackingStatus");
+                .Include("Trackings.TrackingStatus")
+                .Exclude("_id");
 
             var projected = await _shipmentCollection
                 .Find(filter)

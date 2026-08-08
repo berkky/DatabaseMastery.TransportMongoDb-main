@@ -116,6 +116,34 @@ public sealed class ShipmentDuplicateAndProjectionTests : IClassFixture<MongoInt
     }
 
     [Fact]
+    public async Task GetPublicTrackingByTrackingNumber_WithMongoId_DeserializesWithoutExtraElementConvention()
+    {
+        var trackingNumber = $"TEST-INT-MONGO-ID-{Guid.NewGuid():N}";
+        var createdDate = new DateTime(2026, 3, 4, 15, 45, 30, DateTimeKind.Utc);
+
+        await _fixture.ShipmentService.EnsureIndexesAsync();
+        await _fixture.Shipments.InsertOneAsync(
+            MongoTestDataBuilder.CreateSensitiveShipmentEntity(trackingNumber, createdDate));
+
+        var storedShipment = await _fixture.Shipments
+            .Find(x => x.TrackingNumber == trackingNumber)
+            .FirstOrDefaultAsync();
+        Assert.NotNull(storedShipment);
+        Assert.False(string.IsNullOrWhiteSpace(storedShipment!.ShipmentId));
+
+        var result = await _fixture.ShipmentService
+            .GetPublicTrackingByTrackingNumberAsync(trackingNumber);
+
+        Assert.NotNull(result);
+        Assert.Equal(trackingNumber, result!.TrackingNumber);
+        Assert.Equal("Public Status", result.CurrentStatus);
+        Assert.Equal("Public Departure City", result.DepartureCity);
+        Assert.Equal("Public Arrival City", result.ArrivalCity);
+        Assert.Equal(createdDate, result.CreatedDate);
+        Assert.Single(result.Events);
+    }
+
+    [Fact]
     public async Task GetPublicTrackingByTrackingNumber_ReturnsOnlyExpectedPublicData()
     {
         var trackingNumber = $"TEST-INT-PUB-{Guid.NewGuid():N}";
