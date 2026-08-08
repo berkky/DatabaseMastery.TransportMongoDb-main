@@ -1,3 +1,4 @@
+using DatabaseMastery.TransportMongoDb.Dtos.PublicTrackingDtos;
 using DatabaseMastery.TransportMongoDb.Dtos.ShipmentDtos;
 using DatabaseMastery.TransportMongoDb.Entities;
 using DatabaseMastery.TransportMongoDb.Mapping;
@@ -93,6 +94,50 @@ namespace DatabaseMastery.TransportMongoDb.Services.ShipmentServices
                 : ShipmentMapper.ToGetById(value);
         }
 
+        public async Task<PublicTrackingResultDto?> GetPublicTrackingByTrackingNumberAsync(
+            string trackingNumber)
+        {
+            var filter = Builders<Shipment>.Filter.Eq(
+                x => x.TrackingNumber,
+                trackingNumber);
+
+            var projection = Builders<Shipment>.Projection
+                .Include(x => x.TrackingNumber)
+                .Include(x => x.CurrentStatus)
+                .Include(x => x.DepartureCity)
+                .Include(x => x.ArrivalCity)
+                .Include(x => x.CreatedDate)
+                .Include("Trackings.EventDate")
+                .Include("Trackings.TrackingStatus");
+
+            var projected = await _shipmentCollection
+                .Find(filter)
+                .Project<PublicShipmentProjection>(projection)
+                .FirstOrDefaultAsync();
+
+            if (projected is null)
+            {
+                return null;
+            }
+
+            return new PublicTrackingResultDto
+            {
+                TrackingNumber = projected.TrackingNumber,
+                CurrentStatus = projected.CurrentStatus,
+                DepartureCity = projected.DepartureCity,
+                ArrivalCity = projected.ArrivalCity,
+                CreatedDate = projected.CreatedDate,
+                Events = projected.Trackings
+                    .OrderByDescending(tracking => tracking.EventDate)
+                    .Select(tracking => new PublicTrackingEventDto
+                    {
+                        EventDate = tracking.EventDate,
+                        TrackingStatus = tracking.TrackingStatus
+                    })
+                    .ToList()
+            };
+        }
+
         public async Task UpdateShipmentAsync(UpdateShipmentDto updateShipmentDto)
         {
             var existingShipment = await _shipmentCollection
@@ -106,6 +151,28 @@ namespace DatabaseMastery.TransportMongoDb.Services.ShipmentServices
             await _shipmentCollection.FindOneAndReplaceAsync(
                 x => x.ShipmentId == updateShipmentDto.ShipmentId,
                 value);
+        }
+
+        private sealed class PublicShipmentProjection
+        {
+            public string TrackingNumber { get; set; } = string.Empty;
+
+            public string CurrentStatus { get; set; } = string.Empty;
+
+            public string DepartureCity { get; set; } = string.Empty;
+
+            public string ArrivalCity { get; set; } = string.Empty;
+
+            public DateTime CreatedDate { get; set; }
+
+            public List<PublicTrackingEventProjection> Trackings { get; set; } = new();
+        }
+
+        private sealed class PublicTrackingEventProjection
+        {
+            public DateTime EventDate { get; set; }
+
+            public string TrackingStatus { get; set; } = string.Empty;
         }
     }
 }

@@ -32,10 +32,10 @@ namespace DatabaseMastery.TransportMongoDb.Controllers
                 return View();
             }
 
-            var shipmentDto = await _shipmentService
-                .GetShipmentByTrackingNumberAsync(trackingNumber.Trim());
+            var trackingResult = await _shipmentService
+                .GetPublicTrackingByTrackingNumberAsync(trackingNumber.Trim());
 
-            return View(shipmentDto);
+            return View(trackingResult);
         }
     }
 }

@@ -1,5 +1,6 @@
 @using System.Globalization
-@model GetShipmentByIdDto?
+@using DatabaseMastery.TransportMongoDb.Dtos.PublicTrackingDtos
+@model PublicTrackingResultDto?
 
 @{
     Layout = null;
@@ -7,7 +8,7 @@
     var hasSearched = ViewBag.HasSearched is bool searched && searched;
     var searchedNumber = ViewBag.SearchedNumber as string ?? string.Empty;
     var validationMessage = ViewBag.ValidationMessage as string;
-    var trackings = Model?.Trackings?
+    var trackings = Model?.Events?
         .OrderByDescending(x => x.EventDate)
         .ToList();
     var turkishCulture = CultureInfo.GetCultureInfo("tr-TR");
@@ -463,20 +464,12 @@
 
                             <div class="tracking-summary">
                                 <div class="tracking-summary-item">
-                                    <span>Gönderici</span>
-                                    <strong>@Model.SenderName</strong>
-                                </div>
-                                <div class="tracking-summary-item">
-                                    <span>Alıcı</span>
-                                    <strong>@Model.ReceiverName</strong>
-                                </div>
-                                <div class="tracking-summary-item">
                                     <span>Güncel Durum</span>
                                     <strong>@Model.CurrentStatus</strong>
                                 </div>
                                 <div class="tracking-summary-item">
                                     <span>Oluşturulma Tarihi</span>
-                                    <strong>@Model.CreatedDate.ToString("dd MMMM yyyy, HH:mm", turkishCulture)</strong>
+                                    <strong>@Model.CreatedDate.ToString("dd MMMM yyyy", turkishCulture)</strong>
                                 </div>
                             </div>
 
@@ -510,8 +503,6 @@
                                                             @tracking.EventDate.ToString("dd MMMM yyyy, HH:mm", turkishCulture)
                                                         </time>
                                                     </div>
-                                                    <div class="tracking-location">@tracking.Location</div>
-                                                    <p class="tracking-description">@tracking.Description</p>
                                                 </div>
                                             </li>
                                         }

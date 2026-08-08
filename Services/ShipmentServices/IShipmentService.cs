@@ -1,3 +1,4 @@
+using DatabaseMastery.TransportMongoDb.Dtos.PublicTrackingDtos;
 using DatabaseMastery.TransportMongoDb.Dtos.ShipmentDtos;
 
 namespace DatabaseMastery.TransportMongoDb.Services.ShipmentServices
@@ -21,6 +22,9 @@ namespace DatabaseMastery.TransportMongoDb.Services.ShipmentServices
         Task<GetShipmentByIdDto> GetShipmentByIdAsync(string id);
 
         Task<GetShipmentByIdDto?> GetShipmentByTrackingNumberAsync(
+            string trackingNumber);
+
+        Task<PublicTrackingResultDto?> GetPublicTrackingByTrackingNumberAsync(
             string trackingNumber);
 
         Task DeleteShipmentAsync(string id);
