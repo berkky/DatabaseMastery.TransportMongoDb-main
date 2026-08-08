@@ -12,6 +12,13 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Remove="DatabaseMastery.TransportMongoDb.Tests\**" />
+    <Content Remove="DatabaseMastery.TransportMongoDb.Tests\**" />
+    <EmbeddedResource Remove="DatabaseMastery.TransportMongoDb.Tests\**" />
+    <None Remove="DatabaseMastery.TransportMongoDb.Tests\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="MongoDB.Bson" Version="3.9.0" />
     <PackageReference Include="MongoDB.Driver" Version="3.9.0" />
   </ItemGroup>
