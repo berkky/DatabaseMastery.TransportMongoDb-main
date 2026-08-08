@@ -1,6 +1,7 @@
 using System.Globalization;
 using System.Threading.RateLimiting;
 using DatabaseMastery.TransportMongoDb.Entities;
+using DatabaseMastery.TransportMongoDb.HostedServices;
 using DatabaseMastery.TransportMongoDb.Security;
 using DatabaseMastery.TransportMongoDb.Services.AboutServices;
 using DatabaseMastery.TransportMongoDb.Services.AdminLoginRateLimiting;
@@ -62,6 +63,7 @@ builder.Services.AddSingleton<IAdminCredentialService, AdminCredentialService>()
 builder.Services.AddSingleton<IAdminLoginRateLimiter, AdminLoginRateLimiter>();
 builder.Services.AddSingleton<IPublicTrackingRateLimiter, PublicTrackingRateLimiter>();
 builder.Services.AddHostedService<AdminBootstrapHostedService>();
+builder.Services.AddHostedService<ShipmentIndexHostedService>();
 
 builder.Services.AddRateLimiter(options =>
 {

@@ -57,7 +57,21 @@ namespace DatabaseMastery.TransportMongoDb.Controllers
                     createShipmentDto);
             }
 
-            await _shipmentService.CreateShipmentAsync(createShipmentDto);
+            try
+            {
+                await _shipmentService.CreateShipmentAsync(createShipmentDto);
+            }
+            catch (DuplicateTrackingNumberException)
+            {
+                ModelState.AddModelError(
+                    nameof(createShipmentDto.TrackingNumber),
+                    "Bu takip numarası zaten kullanılıyor.");
+
+                return View(
+                    "~/Views/AdminLayout/CreateShipment.cshtml",
+                    createShipmentDto);
+            }
+
             return RedirectToAction(nameof(ShipmentList));
         }
 
@@ -142,7 +156,21 @@ namespace DatabaseMastery.TransportMongoDb.Controllers
                     updateShipmentDto);
             }
 
-            await _shipmentService.UpdateShipmentAsync(updateShipmentDto);
+            try
+            {
+                await _shipmentService.UpdateShipmentAsync(updateShipmentDto);
+            }
+            catch (DuplicateTrackingNumberException)
+            {
+                ModelState.AddModelError(
+                    nameof(updateShipmentDto.TrackingNumber),
+                    "Bu takip numarası zaten kullanılıyor.");
+
+                return View(
+                    "~/Views/AdminLayout/UpdateShipment.cshtml",
+                    updateShipmentDto);
+            }
+
             return RedirectToAction(nameof(ShipmentList));
         }
 

@@ -9,6 +9,8 @@ namespace DatabaseMastery.TransportMongoDb.Services.ShipmentServices
 {
     public class ShipmentService : IShipmentService
     {
+        public const string TrackingNumberUniqueIndexName = "ux_shipments_tracking_number";
+
         private readonly IMongoCollection<Shipment> _shipmentCollection;
 
         public ShipmentService(IDatabaseSettings databaseSettings)
@@ -23,7 +25,15 @@ namespace DatabaseMastery.TransportMongoDb.Services.ShipmentServices
         public async Task CreateShipmentAsync(CreateShipmentDto createShipmentDto)
         {
             var value = ShipmentMapper.ToEntity(createShipmentDto);
-            await _shipmentCollection.InsertOneAsync(value);
+
+            try
+            {
+                await _shipmentCollection.InsertOneAsync(value);
+            }
+            catch (Exception ex) when (IsDuplicateTrackingNumberException(ex))
+            {
+                throw new DuplicateTrackingNumberException();
+            }
         }
 
         public async Task DeleteShipmentAsync(string id)
@@ -148,9 +158,48 @@ namespace DatabaseMastery.TransportMongoDb.Services.ShipmentServices
                 updateShipmentDto,
                 existingShipment?.Trackings);
 
-            await _shipmentCollection.FindOneAndReplaceAsync(
-                x => x.ShipmentId == updateShipmentDto.ShipmentId,
-                value);
+            try
+            {
+                await _shipmentCollection.FindOneAndReplaceAsync(
+                    x => x.ShipmentId == updateShipmentDto.ShipmentId,
+                    value);
+            }
+            catch (Exception ex) when (IsDuplicateTrackingNumberException(ex))
+            {
+                throw new DuplicateTrackingNumberException();
+            }
+        }
+
+        public async Task EnsureIndexesAsync(CancellationToken cancellationToken = default)
+        {
+            var indexKeys = Builders<Shipment>.IndexKeys
+                .Ascending(x => x.TrackingNumber);
+
+            var indexOptions = new CreateIndexOptions
+            {
+                Unique = true,
+                Name = TrackingNumberUniqueIndexName
+            };
+
+            await _shipmentCollection.Indexes.CreateOneAsync(
+                new CreateIndexModel<Shipment>(indexKeys, indexOptions),
+                cancellationToken: cancellationToken);
+        }
+
+        private static bool IsDuplicateTrackingNumberException(Exception exception)
+        {
+            return exception switch
+            {
+                MongoWriteException writeException when
+                    writeException.WriteError?.Category == ServerErrorCategory.DuplicateKey
+                    => true,
+                MongoBulkWriteException bulkWriteException =>
+                    bulkWriteException.WriteErrors.Any(
+                        writeError => writeError.Category == ServerErrorCategory.DuplicateKey),
+                MongoCommandException commandException when commandException.Code == 11000
+                    => true,
+                _ => false
+            };
         }
 
         private sealed class PublicShipmentProjection

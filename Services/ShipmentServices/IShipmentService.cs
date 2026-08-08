@@ -27,6 +27,8 @@ namespace DatabaseMastery.TransportMongoDb.Services.ShipmentServices
         Task<PublicTrackingResultDto?> GetPublicTrackingByTrackingNumberAsync(
             string trackingNumber);
 
+        Task EnsureIndexesAsync(CancellationToken cancellationToken = default);
+
         Task DeleteShipmentAsync(string id);
     }
 }
