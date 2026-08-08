@@ -1,3 +1,5 @@
+using System.Globalization;
+using DatabaseMastery.TransportMongoDb.Services.PublicTrackingRateLimiting;
 using DatabaseMastery.TransportMongoDb.Services.ShipmentServices;
 using Microsoft.AspNetCore.Mvc;
 
@@ -7,10 +9,14 @@ namespace DatabaseMastery.TransportMongoDb.Controllers
     public class TrackingController : Controller
     {
         private readonly IShipmentService _shipmentService;
+        private readonly IPublicTrackingRateLimiter _publicTrackingRateLimiter;
 
-        public TrackingController(IShipmentService shipmentService)
+        public TrackingController(
+            IShipmentService shipmentService,
+            IPublicTrackingRateLimiter publicTrackingRateLimiter)
         {
             _shipmentService = shipmentService;
+            _publicTrackingRateLimiter = publicTrackingRateLimiter;
         }
 
         [HttpGet]
@@ -29,7 +35,9 @@ namespace DatabaseMastery.TransportMongoDb.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Index(string? trackingNumber)
+        public async Task<IActionResult> Index(
+            string? trackingNumber,
+            CancellationToken cancellationToken)
         {
             ApplyTrackingPrivacyHeaders();
 
@@ -48,8 +56,32 @@ namespace DatabaseMastery.TransportMongoDb.Controllers
                 return View();
             }
 
+            var trimmedTrackingNumber = trackingNumber.Trim();
+
+            var rateLimitResult = await _publicTrackingRateLimiter.AcquireAsync(
+                HttpContext.Connection.RemoteIpAddress,
+                cancellationToken);
+
+            if (!rateLimitResult.IsAllowed)
+            {
+                var retrySeconds = Math.Max(
+                    1,
+                    (int)Math.Ceiling(rateLimitResult.RetryAfter.TotalSeconds));
+
+                Response.StatusCode = StatusCodes.Status429TooManyRequests;
+                Response.Headers.RetryAfter =
+                    retrySeconds.ToString(CultureInfo.InvariantCulture);
+
+                const string rateLimitMessage =
+                    "Çok fazla takip sorgusu yapıldı. Lütfen kısa süre sonra tekrar deneyin.";
+
+                ModelState.AddModelError(string.Empty, rateLimitMessage);
+                ViewBag.ValidationMessage = rateLimitMessage;
+                return View();
+            }
+
             var trackingResult = await _shipmentService
-                .GetPublicTrackingByTrackingNumberAsync(trackingNumber.Trim());
+                .GetPublicTrackingByTrackingNumberAsync(trimmedTrackingNumber);
 
             return View(trackingResult);
         }

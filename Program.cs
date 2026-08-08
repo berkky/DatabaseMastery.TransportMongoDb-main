@@ -4,6 +4,7 @@ using DatabaseMastery.TransportMongoDb.Entities;
 using DatabaseMastery.TransportMongoDb.Security;
 using DatabaseMastery.TransportMongoDb.Services.AboutServices;
 using DatabaseMastery.TransportMongoDb.Services.AdminLoginRateLimiting;
+using DatabaseMastery.TransportMongoDb.Services.PublicTrackingRateLimiting;
 using DatabaseMastery.TransportMongoDb.Services.AdminUserServices;
 using DatabaseMastery.TransportMongoDb.Services.BrandServices;
 using DatabaseMastery.TransportMongoDb.Services.GetInTouchServices;
@@ -45,6 +46,10 @@ builder.Services.AddOptions<AdminLoginRateLimitOptions>()
     .Bind(builder.Configuration.GetSection(AdminLoginRateLimitOptions.SectionName))
     .ValidateDataAnnotations()
     .ValidateOnStart();
+builder.Services.AddOptions<PublicTrackingRateLimitOptions>()
+    .Bind(builder.Configuration.GetSection(PublicTrackingRateLimitOptions.SectionName))
+    .ValidateDataAnnotations()
+    .ValidateOnStart();
 builder.Services.AddScoped<IDatabaseSettings>(sp =>
     sp.GetRequiredService<IOptions<DatabaseSettings>>().Value);
 builder.Services.AddSingleton<IMongoClient>(sp =>
@@ -55,6 +60,7 @@ builder.Services.AddSingleton<IMongoClient>(sp =>
 builder.Services.AddSingleton<IPasswordHasher<AdminUser>, PasswordHasher<AdminUser>>();
 builder.Services.AddSingleton<IAdminCredentialService, AdminCredentialService>();
 builder.Services.AddSingleton<IAdminLoginRateLimiter, AdminLoginRateLimiter>();
+builder.Services.AddSingleton<IPublicTrackingRateLimiter, PublicTrackingRateLimiter>();
 builder.Services.AddHostedService<AdminBootstrapHostedService>();
 
 builder.Services.AddRateLimiter(options =>
