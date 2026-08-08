@@ -1,4 +1,5 @@
 using System.Globalization;
+using System.Net;
 using System.Threading.RateLimiting;
 using DatabaseMastery.TransportMongoDb.Entities;
 using DatabaseMastery.TransportMongoDb.Filters;
@@ -21,6 +22,7 @@ using DatabaseMastery.TransportMongoDb.Services.SliderServices;
 using DatabaseMastery.TransportMongoDb.Services.TestimonialServices;
 using DatabaseMastery.TransportMongoDb.Settings;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
@@ -155,12 +157,29 @@ builder.Services.AddHealthChecks()
     .AddCheck<MongoDbHealthCheck>("mongodb", tags: ["ready"])
     .AddCheck<DatabaseConfigurationHealthCheck>("database_configuration", tags: ["ready"]);
 
+builder.Services.Configure<ForwardedHeadersOptions>(options =>
+{
+    options.ForwardedHeaders =
+        ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
+    options.ForwardLimit = 1;
+    options.KnownNetworks.Clear();
+    options.KnownProxies.Clear();
+    options.KnownProxies.Add(IPAddress.Loopback);
+    options.KnownProxies.Add(IPAddress.IPv6Loopback);
+});
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
+}
+
+app.UseForwardedHeaders();
+
+if (!app.Environment.IsDevelopment())
+{
     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
