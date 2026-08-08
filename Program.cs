@@ -138,6 +138,10 @@ builder.Services
     });
 
 builder.Services.AddAuthorization();
+builder.Services.AddAntiforgery(options =>
+{
+    options.SuppressXFrameOptionsHeader = true;
+});
 builder.Services.AddControllersWithViews(options =>
 {
     options.Filters.Add<AuthenticatedNoStoreFilter>();
