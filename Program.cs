@@ -3,6 +3,7 @@ using System.Threading.RateLimiting;
 using DatabaseMastery.TransportMongoDb.Entities;
 using DatabaseMastery.TransportMongoDb.Filters;
 using DatabaseMastery.TransportMongoDb.HostedServices;
+using DatabaseMastery.TransportMongoDb.Infrastructure.Operations;
 using DatabaseMastery.TransportMongoDb.Middleware;
 using DatabaseMastery.TransportMongoDb.Security;
 using DatabaseMastery.TransportMongoDb.Services.AboutServices;
@@ -19,8 +20,10 @@ using DatabaseMastery.TransportMongoDb.Services.ShipmentTrackingServices;
 using DatabaseMastery.TransportMongoDb.Services.SliderServices;
 using DatabaseMastery.TransportMongoDb.Services.TestimonialServices;
 using DatabaseMastery.TransportMongoDb.Settings;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.RateLimiting;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Options;
 using MongoDB.Driver;
 
@@ -147,6 +150,11 @@ builder.Services.AddControllersWithViews(options =>
     options.Filters.Add<AuthenticatedNoStoreFilter>();
 });
 
+builder.Services.AddHealthChecks()
+    .AddCheck("self", () => HealthCheckResult.Healthy(), tags: ["live"])
+    .AddCheck<MongoDbHealthCheck>("mongodb", tags: ["ready"])
+    .AddCheck<DatabaseConfigurationHealthCheck>("database_configuration", tags: ["ready"]);
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -158,7 +166,9 @@ if (!app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+app.UseMiddleware<CorrelationIdMiddleware>();
 app.UseMiddleware<SecurityHeadersMiddleware>();
+app.UseMiddleware<RequestTelemetryMiddleware>();
 app.UseRouting();
 
 app.UseRateLimiter();
@@ -167,6 +177,20 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapStaticAssets();
+
+app.MapHealthChecks("/health/live", new HealthCheckOptions
+{
+    Predicate = registration => registration.Tags.Contains("live"),
+    AllowCachingResponses = false,
+    ResponseWriter = HealthResponseWriter.WriteResponseAsync
+}).AllowAnonymous();
+
+app.MapHealthChecks("/health/ready", new HealthCheckOptions
+{
+    Predicate = registration => registration.Tags.Contains("ready"),
+    AllowCachingResponses = false,
+    ResponseWriter = HealthResponseWriter.WriteResponseAsync
+}).AllowAnonymous();
 
 app.MapControllerRoute(
     name: "default",

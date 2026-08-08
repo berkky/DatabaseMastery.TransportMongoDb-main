@@ -1,3 +1,4 @@
+using DatabaseMastery.TransportMongoDb.Infrastructure.Operations;
 using DatabaseMastery.TransportMongoDb.Models;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
@@ -19,7 +20,11 @@ namespace DatabaseMastery.TransportMongoDb.Controllers
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()
         {
-            return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+            var correlationId = HttpContext.Items[CorrelationIdMiddleware.ItemKey] as string
+                ?? Activity.Current?.Id
+                ?? HttpContext.TraceIdentifier;
+
+            return View(new ErrorViewModel { RequestId = correlationId });
         }
     }
 }
