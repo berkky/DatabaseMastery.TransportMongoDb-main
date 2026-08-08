@@ -1,7 +1,9 @@
 using System.Globalization;
 using System.Threading.RateLimiting;
 using DatabaseMastery.TransportMongoDb.Entities;
+using DatabaseMastery.TransportMongoDb.Filters;
 using DatabaseMastery.TransportMongoDb.HostedServices;
+using DatabaseMastery.TransportMongoDb.Middleware;
 using DatabaseMastery.TransportMongoDb.Security;
 using DatabaseMastery.TransportMongoDb.Services.AboutServices;
 using DatabaseMastery.TransportMongoDb.Services.AdminLoginRateLimiting;
@@ -136,7 +138,10 @@ builder.Services
     });
 
 builder.Services.AddAuthorization();
-builder.Services.AddControllersWithViews();
+builder.Services.AddControllersWithViews(options =>
+{
+    options.Filters.Add<AuthenticatedNoStoreFilter>();
+});
 
 var app = builder.Build();
 
@@ -149,6 +154,7 @@ if (!app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+app.UseMiddleware<SecurityHeadersMiddleware>();
 app.UseRouting();
 
 app.UseRateLimiter();
