@@ -73,6 +73,37 @@ internal static class HttpTestHelpers
         AssertHeaderContains(response, "Cache-Control", "no-store");
     }
 
+    public static void AssertAuthenticatedNoStoreHeaders(HttpResponseMessage response)
+    {
+        AssertHeaderContains(response, "Cache-Control", "no-store");
+        AssertHeaderContains(response, "Cache-Control", "no-cache");
+        AssertHeaderContains(response, "Cache-Control", "max-age=0");
+        AssertHeaderContains(response, "Pragma", "no-cache");
+        AssertSingleHeader(response, "Expires", "0");
+    }
+
+    public static void AssertNoAuthenticatedNoStoreSignature(HttpResponseMessage response)
+    {
+        AssertHeaderAbsent(response, "Cache-Control", "no-store");
+        AssertHeaderAbsent(response, "Cache-Control", "max-age=0");
+    }
+
+    public static bool TryGetHeaderValue(
+        HttpResponseMessage response,
+        string headerName,
+        out string headerValue)
+    {
+        if (response.Headers.TryGetValues(headerName, out var values) ||
+            response.Content.Headers.TryGetValues(headerName, out values))
+        {
+            headerValue = Assert.Single(values!.ToArray());
+            return true;
+        }
+
+        headerValue = string.Empty;
+        return false;
+    }
+
     public static async Task<JsonDocument> ReadJsonAsync(HttpResponseMessage response)
     {
         var content = await response.Content.ReadAsStringAsync();
