@@ -408,7 +408,7 @@
                     </p>
 
                     <div class="form-trackparcel">
-                        <form method="get" action="/Tracking/Index/">
+                        <form asp-controller="Tracking" asp-action="Index" method="post">
                             <div class="form-group">
                                 <label class="visually-hidden" for="trackingNumber">Takip numarası</label>
                                 <input class="form-control"
@@ -418,6 +418,7 @@
                                        value="@searchedNumber"
                                        placeholder="Takip numaranızı girin"
                                        autocomplete="off"
+                                       maxlength="64"
                                        aria-describedby="trackingValidation"
                                        aria-invalid="@(!string.IsNullOrWhiteSpace(validationMessage) ? "true" : "false")">
                                 <button class="btn btn-brand-1 btn-track" type="submit">Kargomu Sorgula</button>

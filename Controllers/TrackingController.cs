@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace DatabaseMastery.TransportMongoDb.Controllers
 {
+    [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
     public class TrackingController : Controller
     {
         private readonly IShipmentService _shipmentService;
@@ -13,18 +14,27 @@ namespace DatabaseMastery.TransportMongoDb.Controllers
         }
 
         [HttpGet]
+        public IActionResult Index()
+        {
+            ApplyTrackingPrivacyHeaders();
+
+            if (Request.Query.ContainsKey("trackingNumber"))
+            {
+                return RedirectToAction(nameof(Index));
+            }
+
+            ViewBag.HasSearched = false;
+            return View();
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Index(string? trackingNumber)
         {
-            var hasSearched = trackingNumber is not null ||
-                ModelState.ContainsKey(nameof(trackingNumber));
+            ApplyTrackingPrivacyHeaders();
 
-            ViewBag.HasSearched = hasSearched;
+            ViewBag.HasSearched = true;
             ViewBag.SearchedNumber = trackingNumber ?? string.Empty;
-
-            if (!hasSearched)
-            {
-                return View();
-            }
 
             if (string.IsNullOrWhiteSpace(trackingNumber))
             {
@@ -32,10 +42,22 @@ namespace DatabaseMastery.TransportMongoDb.Controllers
                 return View();
             }
 
+            if (trackingNumber.Length > 64)
+            {
+                ViewBag.ValidationMessage = "Takip numarası en fazla 64 karakter olabilir.";
+                return View();
+            }
+
             var trackingResult = await _shipmentService
                 .GetPublicTrackingByTrackingNumberAsync(trackingNumber.Trim());
 
             return View(trackingResult);
+        }
+
+        private void ApplyTrackingPrivacyHeaders()
+        {
+            Response.Headers["Referrer-Policy"] = "no-referrer";
+            Response.Headers["Expires"] = "0";
         }
     }
 }
