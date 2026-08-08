@@ -3,6 +3,7 @@ using DatabaseMastery.TransportMongoDb.Security;
 using DatabaseMastery.TransportMongoDb.Services.ShipmentServices;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 using MongoDB.Bson;
 
 namespace DatabaseMastery.TransportMongoDb.Controllers
@@ -36,6 +37,12 @@ namespace DatabaseMastery.TransportMongoDb.Controllers
         public async Task<IActionResult> CreateShipment(
             CreateShipmentDto createShipmentDto)
         {
+            NormalizeTrackingNumber(
+                createShipmentDto.TrackingNumber,
+                nameof(createShipmentDto.TrackingNumber),
+                value => createShipmentDto.TrackingNumber = value,
+                ModelState);
+
             if (createShipmentDto.CreatedDate == default)
             {
                 ModelState.AddModelError(
@@ -115,6 +122,12 @@ namespace DatabaseMastery.TransportMongoDb.Controllers
                 return BadRequest();
             }
 
+            NormalizeTrackingNumber(
+                updateShipmentDto.TrackingNumber,
+                nameof(updateShipmentDto.TrackingNumber),
+                value => updateShipmentDto.TrackingNumber = value,
+                ModelState);
+
             if (updateShipmentDto.CreatedDate == default)
             {
                 ModelState.AddModelError(
@@ -131,6 +144,38 @@ namespace DatabaseMastery.TransportMongoDb.Controllers
 
             await _shipmentService.UpdateShipmentAsync(updateShipmentDto);
             return RedirectToAction(nameof(ShipmentList));
+        }
+
+        private static void NormalizeTrackingNumber(
+            string? trackingNumber,
+            string propertyName,
+            Action<string> setCanonical,
+            ModelStateDictionary modelState)
+        {
+            const string requiredMessage = "Takip numarası gereklidir.";
+            const string maxLengthMessage =
+                "Takip numarası en fazla 64 karakter olabilir.";
+
+            if (trackingNumber is null)
+            {
+                modelState.AddModelError(propertyName, requiredMessage);
+                return;
+            }
+
+            var trimmed = trackingNumber.Trim();
+            setCanonical(trimmed);
+            modelState.Remove(propertyName);
+
+            if (string.IsNullOrEmpty(trimmed))
+            {
+                modelState.AddModelError(propertyName, requiredMessage);
+                return;
+            }
+
+            if (trimmed.Length > 64)
+            {
+                modelState.AddModelError(propertyName, maxLengthMessage);
+            }
         }
     }
 }
